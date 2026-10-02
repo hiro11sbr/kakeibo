@@ -639,7 +639,7 @@
   #view2 .ag-day.today .ag-date b{ background:#173F78; }
   #view2 .row-add{ --c:#173F78; }
   #view1 .card .f-amt{ color:var(--ink); }
-  nav.tabbar[data-v="1"] button.active{ color:#173A9E; }
+  nav.tabbar[data-v="0"] button.active{ color:#173A9E; }
   nav.tabbar[data-v="2"] button.active{ color:#173F78; }
   nav.tabbar[data-v="3"] button.active{ color:var(--ink); }
   @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) nav.tabbar[data-v="2"] button.active, :root:not([data-theme="light"]) nav.tabbar[data-v="1"] button.active{ color:#8FB4FF; } }
@@ -1172,6 +1172,89 @@
   /* v33：積立の説明文 */
   .sav-pitch{ font-size:12.5px; line-height:1.75; color:var(--ink-soft); }
 
+  /* v35：履歴の一覧はガラスにしてレポート（白）と区別 */
+  #recordsList .card{ background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.28); box-shadow:none;
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+  #recordsList .card .crud-view{ background:transparent !important; }
+  #recordsList .card .crud-row{ border-bottom-color:rgba(255,255,255,.16); }
+  #recordsList .card .f-name{ color:#fff; }
+  #recordsList .card .f-name .sub{ color:rgba(255,255,255,.65); }
+  #recordsList .card .f-amt{ color:#fff; }
+  #recordsList .card .crud-ic:not([style*="background"]){ background:rgba(255,255,255,.16); color:#fff; }
+  #recordsList .card .crud-ic{ box-shadow:0 0 0 1px rgba(255,255,255,.25); }
+  #recordsList .crud-row:not(.armed) .del-reveal{ visibility:hidden; }
+  #recordsList .empty-card{ color:rgba(255,255,255,.85); }
+
+  /* v35：支払いは収入・引落を別カードに。チェックは箱だけで反応 */
+  #view2 .grp-head b{ font-size:13px; color:#fff; }
+  .inc-card #extraAddBtn{ border-top:1px solid var(--hair); }
+  .pay-balance{ display:flex; justify-content:space-between; align-items:baseline; margin:14px 6px 0; color:rgba(255,255,255,.85); font-size:12px; font-weight:600; }
+  .pay-balance b{ font-size:16px; color:#fff; }
+  .pay-row .chk{ position:relative; }
+  .pay-row .chk::before{ content:""; position:absolute; inset:-10px; }
+  .pay-row[data-pay-key], .pay-row.income{ cursor:pointer; }
+
+  /* v35：バックアップの前回書き出し日は「書き出す」の右に小さく */
+  .row-add.ra-split{ display:flex; justify-content:space-between; align-items:center; }
+  .ra-note{ font-size:11.5px; font-weight:500; color:var(--ink-faint); }
+
+  /* v35：プライバシーポリシー */
+  .sec-last{ margin-top:30px; }
+  .policy-sheet{ max-height:88vh !important; }
+  .policy{ font-size:13px; line-height:1.75; color:var(--ink); }
+  .policy h3{ font-size:14px; margin:18px 0 4px; }
+  .policy p{ margin:0 0 8px; }
+  .policy ul{ margin:0 0 8px; padding-left:1.3em; }
+  .policy-date{ margin-top:16px !important; font-size:12px; color:var(--ink-soft); }
+
+  /* v36：設定の各カード上端の色線を、全カード共通の上枠に（固定支出の見出しで隠れないように） */
+  .sec .card{ box-shadow:var(--shadow) !important; border-top:3px solid var(--c); }
+
+  /* v36：固定支出のグループ見出しは「見出し」らしく、小計は控えめに（塗りつぶしをやめて区別） */
+  .subhead{ background:none !important; border-bottom:none !important; padding:14px 14px 4px !important; font-size:12.5px !important; font-weight:800 !important; color:var(--ink) !important; display:flex; align-items:center; justify-content:flex-start !important; gap:7px; }
+  .subhead::before{ content:""; width:4px; height:14px; border-radius:2px; background:var(--c); flex:none; }
+  .subhead ~ .subhead{ border-top:none !important; margin-top:4px; }
+  .subfoot{ background:color-mix(in srgb, var(--c) 9%, var(--card)) !important; border-top:none !important; border-bottom:1px solid var(--hair); padding:9px 14px !important; font-size:11.5px !important; }
+  .subfoot span:last-child{ color:var(--c); font-weight:800; }
+
+  /* v38：設定の追加ボタンはカードの外に（点線の枠で「足す」ことを表す） */
+  .sec-add{ display:block; width:100%; margin-top:10px; padding:12px; border:1.5px dashed color-mix(in srgb, var(--c) 55%, transparent); border-radius:14px;
+    background:color-mix(in srgb, var(--c) 6%, transparent); color:var(--c); font-size:14px; font-weight:700; -webkit-tap-highlight-color:transparent; }
+  .sec-add:active{ background:color-mix(in srgb, var(--c) 14%, transparent); }
+
+  /* v38：積立は「1年あたり ÷12 → 1か月あたり」と、固定支出に含めるスイッチ */
+  .sav-permonth{ flex:none; text-align:right; font-size:12px; color:var(--ink-soft); white-space:nowrap; }
+  .sav-permonth b{ display:block; font-size:17px; color:var(--c); margin-top:1px; }
+  .sav-switch{ cursor:pointer; position:relative; }
+  .sav-switch input{ position:absolute; opacity:0; width:0; height:0; }
+  .sw-ui{ flex:none; position:relative; width:51px; height:31px; border-radius:16px; background:var(--rule-strong); transition:background .2s; }
+  .sw-ui::after{ content:""; position:absolute; top:2px; left:2px; width:27px; height:27px; border-radius:50%; background:#fff; box-shadow:0 2px 4px rgba(0,0,0,.2); transition:transform .2s; }
+  .sav-switch input:checked + .sw-ui{ background:var(--c); }
+  .sav-switch input:checked + .sw-ui::after{ transform:translateX(20px); }
+
+  /* v38：積立の説明文は文節単位で改行（語の途中で行が変わらないように） */
+  .sav-pitch{ word-break:keep-all; overflow-wrap:anywhere; line-break:strict; }
+  .sav-pitch p{ margin:0 0 10px; }
+  .sav-pitch p:last-child{ margin-bottom:0; font-weight:700; color:var(--ink); }
+
+  /* v40：積立の反映ボタンは押せる見た目に（立体感・矢印・押した感触） */
+  .sav-btn{ position:relative; padding:9px 26px 9px 14px; border-radius:14px; gap:0;
+    background:linear-gradient(180deg, color-mix(in srgb, var(--c) 82%, #fff), var(--c));
+    box-shadow:0 3px 0 color-mix(in srgb, var(--c) 70%, #000), 0 6px 14px color-mix(in srgb, var(--c) 35%, transparent);
+    transition:transform .08s, box-shadow .08s; }
+  .sav-btn::after{ content:""; position:absolute; right:11px; top:50%; width:7px; height:7px; border-top:2px solid #fff; border-right:2px solid #fff; transform:translateY(-50%) rotate(45deg); }
+  .sav-btn .sb-top{ font-size:11px; opacity:.95; }
+  .sav-btn .sb-lbl{ font-size:12px; font-weight:800; }
+  .sav-btn:active{ transform:translateY(3px); box-shadow:0 0 0 color-mix(in srgb, var(--c) 70%, #000), 0 2px 6px color-mix(in srgb, var(--c) 30%, transparent); }
+  .sav-btn.done{ background:color-mix(in srgb, var(--c) 12%, var(--card)); color:var(--c); box-shadow:none; padding-right:14px; }
+  .sav-btn.done::after{ display:none; }
+  .sav-btn.done:active{ transform:none; }
+
+  /* v41：追加ボタンはカード右下の小さな塗りピル（C案） */
+  .sec-add{ display:block; width:auto !important; margin:10px 0 0 auto !important; padding:8px 16px !important; border:none !important; border-radius:999px !important;
+    background:var(--c) !important; color:#fff !important; font-size:13px !important; font-weight:700; box-shadow:0 2px 8px color-mix(in srgb, var(--c) 35%, transparent); }
+  .sec-add:active{ transform:scale(.96); background:color-mix(in srgb, var(--c) 85%, #000) !important; }
+
   /* タブバー：すりガラス */
   nav.tabbar{ background:color-mix(in srgb, var(--card) 78%, transparent); border-top:1px solid var(--hair);
     backdrop-filter:saturate(1.6) blur(20px); -webkit-backdrop-filter:saturate(1.6) blur(20px); }
@@ -1180,6 +1263,27 @@
 </head>
 <body>
 <div id="shell">
+
+  <div class="view tabview" id="view1">
+    <div class="app-inner">
+      <div class="band">
+        <span class="band-mark" data-icon="receipt"></span>
+        <header class="top-space"></header>
+        <div class="band-nav">
+          <button class="gbtn" id="recPrev">‹</button>
+          <div class="band-title"><div class="band-eyebrow">変動費の履歴</div><div class="t" id="recTitle">今月</div><div class="band-sub" id="recRange"></div></div>
+          <button class="gbtn" id="recNext">›</button>
+        </div>
+      </div>
+      <div class="body">
+        <div class="card rec-report" id="recReport" hidden>
+          <div class="rep-chart" id="repChart"></div>
+          <div id="repCatList"></div>
+        </div>
+        <div id="recordsList"></div>
+      </div>
+    </div>
+  </div>
 
   <div class="view" id="view0">
     <div class="app-inner">
@@ -1217,27 +1321,6 @@
     </div>
   </div>
 
-  <div class="view tabview" id="view1">
-    <div class="app-inner">
-      <div class="band">
-        <span class="band-mark" data-icon="receipt"></span>
-        <header class="top-space"></header>
-        <div class="band-nav">
-          <button class="gbtn" id="recPrev">‹</button>
-          <div class="band-title"><div class="band-eyebrow">変動費の履歴</div><div class="t" id="recTitle">今月</div><div class="band-sub" id="recRange"></div></div>
-          <button class="gbtn" id="recNext">›</button>
-        </div>
-      </div>
-      <div class="body">
-        <div class="card rec-report" id="recReport" hidden>
-          <div class="rep-chart" id="repChart"></div>
-          <div id="repCatList"></div>
-        </div>
-        <div id="recordsList"></div>
-      </div>
-    </div>
-  </div>
-
   <div class="view tabview" id="view2">
     <div class="app-inner">
       <div class="band">
@@ -1245,7 +1328,7 @@
         <header class="top-space"></header>
         <div class="band-nav">
           <button class="gbtn" id="payPrev">‹</button>
-          <div class="band-title"><div class="band-eyebrow">引落と入金</div><div class="t" id="payTitle">今月</div></div>
+          <div class="band-title"><div class="t" id="payTitle">今月</div></div>
           <button class="gbtn" id="payNextBtn">›</button>
         </div>
         <div class="glass-chip" id="payChip2"></div>
@@ -1268,31 +1351,33 @@
 
         <section class="sec" style="--c:#0B5FD9">
           <div class="sec-head"><span class="sec-ic" data-icon="yen"></span><span class="sec-title">固定収入</span><span class="sec-total num" id="setIncomeTotal">¥0</span></div>
-                    <div class="card"><div id="setIncomeList"></div><button class="row-add" id="setIncomeAddBtn">＋ 固定収入を追加</button></div>
+                    <div class="card"><div id="setIncomeList"></div></div>
+          <button type="button" class="sec-add" id="setIncomeAddBtn">＋ 追加</button>
         </section>
 
         <section class="sec" style="--c:#D2782A">
           <div class="sec-head"><span class="sec-ic" data-icon="home"></span><span class="sec-title">固定支出</span><span class="sec-total num" id="setFixedTotal">¥0</span></div>
-                    <div class="card"><div id="setFixedList"></div><button class="row-add" id="setFixedAddBtn">＋ 項目を追加</button></div>
+                    <div class="card"><div id="setFixedList"></div></div>
+          <button type="button" class="sec-add" id="setFixedAddBtn">＋ 追加</button>
         </section>
 
         <section class="sec" style="--c:#6E56CF">
           <div class="sec-head"><span class="sec-ic" data-icon="creditcard"></span><span class="sec-title">支払い方法</span></div>
-                    <div class="card"><div id="setCardList"></div><button class="row-add" id="setCardAddBtn">＋ 支払い方法を追加</button>
-          </div>
+                    <div class="card"><div id="setCardList"></div></div>
+          <button type="button" class="sec-add" id="setCardAddBtn">＋ 追加</button>
         </section>
 
         <section class="sec" id="savSection" style="--c:#1E9E6A">
           <div class="sec-head"><span class="sec-ic" data-icon="piggy"></span><span class="sec-title">積立</span><span class="sec-total num" id="savMonthTotal">¥0</span></div>
-          <div class="sec-desc sav-pitch">車検、固定資産税、火災保険、冠婚葬祭、家電の買い替え――年に1回や数年に1回の大きな出費は、忘れたころに必ずやってくる。家計が崩れるのは、たいていその月だ。<br><br>ここに登録して「固定支出に反映」しておけば、毎月の「使える額」が最初からその分だけ少なくなる。細かく管理しなくても、その月が来たときにはちゃんとお金が残っている。慌ててカードの分割に頼ることも、ボーナスを取り崩すこともない。<br><br>未来の自分を助けるのは、今月の少しずつの積み立てだ。</div>
+          <div class="sec-desc sav-pitch"><p>車検、<wbr>固定資産税、<wbr>冠婚葬祭、<wbr>家電の<wbr>買い替え。<wbr>年に<wbr>1回や<wbr>数年に<wbr>1回の<wbr>大きな<wbr>出費は、<wbr>忘れたころに<wbr>やってくる。<wbr>家計が<wbr>崩れるのは、<wbr>たいてい<wbr>その月。</p><p>だからこそ、<wbr>ここに<wbr>登録して、<wbr>毎月の<wbr>固定支出に<wbr>含めておこう。<wbr>「使える額」が<wbr>最初から<wbr>その分だけ<wbr>減るので、<wbr>細かく<wbr>管理しなくても、<wbr>その月が<wbr>来たときに<wbr>お金が<wbr>ちゃんと<wbr>残っている。</p><p>未来の<wbr>自分を<wbr>助けるために、<wbr>今月から<wbr>少しずつ<wbr>積み立てよう。</p></div>
           <div class="card"><div id="savingsList"></div>
-            <button class="row-add" id="savAddBtn">＋ 項目を追加</button>
             <div class="srow sav-apply">
               <span class="srow-l">1年あたり<b class="num" id="savYearTotal">¥0</b></span>
               <span class="sav-arrow" aria-hidden="true"><span class="sav-div">÷12</span><i></i></span>
-              <button type="button" class="sav-btn" id="savApplyBtn"><span>月 <b class="num" id="savMonthTotal2">¥0</b> を</span><span id="savApplyLbl">固定支出に反映</span></button>
+              <button type="button" class="sav-btn" id="savApplyBtn"><span class="sb-top">月 <b class="num" id="savMonthTotal2">¥0</b> を</span><span class="sb-lbl" id="savApplyLbl">固定支出に反映</span></button>
             </div>
           </div>
+          <button type="button" class="sec-add" id="savAddBtn">＋ 追加</button>
         </section>
 
         <section class="sec" style="--c:#0B5FD9">
@@ -1311,11 +1396,15 @@
           <div class="sec-head"><span class="sec-ic" data-icon="database"></span><span class="sec-title">バックアップ</span></div>
           <div class="sec-desc">データはこのiPhoneの中にだけある。書き出したファイルを iCloud Drive に保存しておけば、機種変更やアプリを消したときも元に戻せる。</div>
           <div class="card">
-            <div class="srow"><span class="srow-l">最終書き出し<span class="sub" id="lastExportLbl">まだ書き出していない</span></span></div>
-            <button class="row-add" id="exportBtn">書き出す</button>
+            <button class="row-add ra-split" id="exportBtn"><span>書き出す</span><span class="ra-note" id="lastExportLbl">前回書き出し日：未</span></button>
             <button class="row-add" id="importBtn">読み込む</button>
             <input type="file" id="importFile" accept=".json,application/json" hidden>
           </div>
+        </section>
+
+        <!-- プライバシーポリシーは設定の一番下に置く（今後項目が増えてもこの上に追加する） -->
+        <section class="sec sec-last" style="--c:#5F6B7A">
+          <div class="card"><button class="row-add ra-split" id="privacyBtn"><span>プライバシーポリシー</span><span class="ra-note">›</span></button></div>
         </section>
 
 
@@ -1414,7 +1503,7 @@
     <input type="text" id="esName" class="memo-input" placeholder="項目名" style="margin-bottom:14px;">
     <div class="amount-card filled">
       <label class="amount-label-inner" for="esAmount">金額</label>
-      <div class="amount-row"><span class="yen">¥</span><input id="esAmount" class="amount-input num" type="number" inputmode="numeric" placeholder="0"></div>
+      <div class="amount-row"><span class="yen">¥</span><input id="esAmount" class="amount-input num" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0"></div>
     </div>
     <div id="esBreak"></div>
     <input type="number" inputmode="numeric" id="esDay" class="memo-input" placeholder="入金日（数字のみ・任意）" style="margin-top:14px;">
@@ -1429,6 +1518,41 @@
     <div class="modal-title">支払元</div>
     <div id="payPickList"></div>
     <button class="modal-cancel" id="payPickCancel">閉じる</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="privacyModal" hidden>
+  <div class="modal-sheet policy-sheet">
+    <div class="modal-title">プライバシーポリシー</div>
+    <div class="policy">
+      <p>クレカケイ（以下「本アプリ」）は、利用者の家計に関する情報を扱うアプリとして、その取り扱いを以下のとおり定めます。</p>
+      <h3>1. 取り扱う情報</h3>
+      <p>本アプリが扱うのは、利用者が自分で入力した次の情報だけです。</p>
+      <ul><li>支出の記録（日付・金額・カテゴリ・メモ・支払元）</li><li>固定収入・固定支出・積立の名前、金額、日付</li><li>支払い方法の名前と引落日</li><li>引落チェックの状態、アプリの表示設定</li></ul>
+      <p>氏名、住所、電話番号、メールアドレス、位置情報、端末の識別番号などは取得しません。会員登録やログインもありません。</p>
+      <h3>2. 情報の保存場所</h3>
+      <p>入力した情報は、利用者のiPhoneの中（ブラウザのアプリ用保存領域）にだけ保存されます。開発者のサーバーや外部のサービスへ送信されることはなく、開発者が利用者の情報を見ることはできません。</p>
+      <h3>3. 利用目的</h3>
+      <p>保存した情報は、残額・引落予定・レポートなどを利用者の画面に表示するためだけに使います。</p>
+      <h3>4. 第三者への提供</h3>
+      <p>本アプリは情報を外部に送信しないため、第三者に提供することはありません。</p>
+      <h3>5. 解析ツール・広告・Cookie</h3>
+      <p>本アプリは、アクセス解析ツール、広告、トラッキング目的のCookieを使用していません。</p>
+      <h3>6. 配信元（GitHub Pages）について</h3>
+      <p>本アプリのファイルは GitHub, Inc. が提供する GitHub Pages から配信されています。アプリを開く際、通信の仕組み上、利用者のIPアドレスなどのアクセス情報が GitHub のサーバーに記録されることがあります。この情報は GitHub のプライバシーステートメントに従って扱われ、開発者は利用者の入力した家計の情報と結び付けることはできません。</p>
+      <h3>7. バックアップファイル</h3>
+      <p>設定の「書き出す」で作られるファイルには、本アプリの全データが含まれます。保存先（iCloud Drive など）や共有の範囲は利用者が選ぶもので、その管理は利用者の責任となります。他人に渡さないようご注意ください。</p>
+      <h3>8. 情報の削除</h3>
+      <p>ホーム画面から本アプリを削除すると、iPhoneの中のデータも削除されます。個別の記録は、アプリ内の編集画面から削除できます。</p>
+      <h3>9. 安全管理</h3>
+      <p>情報は利用者の端末内にのみ保存されるため、端末の画面ロックなどで端末自体を保護してください。</p>
+      <h3>10. 本ポリシーの変更</h3>
+      <p>機能の追加などに合わせて本ポリシーを変更することがあります。変更後の内容は、本アプリ内のこのページに掲載した時点から適用します。</p>
+      <h3>11. お問い合わせ</h3>
+      <p>本ポリシーに関するお問い合わせは、下記までご連絡ください。<br>連絡先：<span class="policy-contact">（未設定）</span></p>
+      <p class="policy-date">制定日：2026年10月2日</p>
+    </div>
+    <button class="modal-cancel" id="privacyClose">閉じる</button>
   </div>
 </div>
 
@@ -1478,7 +1602,7 @@
 
 
   var TABS = [
-    {icon:'home', label:'ホーム'}, {icon:'receipt', label:'履歴'},
+    {icon:'receipt', label:'履歴'}, {icon:'home', label:'ホーム'},
     {icon:'calrepeat', label:'支払い'}, {icon:'gear', label:'設定'}
   ];
   (function buildTabbar(){
@@ -2399,34 +2523,38 @@
       }
       document.getElementById('payChip2').innerHTML = chip;
 
-      var groups = {}, order = [];
-      function g(key, date){ if(!groups[key]){ groups[key]={date:date, inc:[], pay:[]}; order.push(key); } return groups[key]; }
-      items.forEach(function(it){ if(isEmptyBill(it) && mkNum(it.mk) < mkNum(monthKey())) return; g(it.monthOnly ? 'month' : it.actual.toDateString(), it.monthOnly?null:it.actual).pay.push(it); });
-      incomesFor(y,m,income).forEach(function(inc){
+      // 収入と引落を別のカードにする（今月の固定収支がそれぞれ一目でわかるように）
+      function dateCell(d){
+        return d ? '<div class="ag-date'+(d.getDay()===6?' sat':d.getDay()===0?' sun':'')+'"><b>'+d.getDate()+'</b><span>'+WD[d.getDay()]+'</span></div>'
+                 : '<div class="ag-date month"><b>月内</b><span>日付なし</span></div>';
+      }
+      function agenda(list, rowFn){
+        var groups = {}, order = [];
+        list.forEach(function(it){
+          var d = it.monthOnly ? null : it.actual, k = d ? d.toDateString() : 'month';
+          if(!groups[k]){ groups[k] = {date:d, items:[]}; order.push(k); }
+          groups[k].items.push(it);
+        });
+        order.sort(function(a,b){ var A=groups[a].date, B=groups[b].date; if(!A) return 1; if(!B) return -1; return A-B; });
+        return order.map(function(k){
+          var gr = groups[k], d = gr.date;
+          return '<div class="ag-day'+(d && sameDay(d,today)?' today':'')+(d && d<today?' past':'')+'">'+dateCell(d)+'<div class="ag-items">'+gr.items.map(rowFn).join('')+'</div></div>';
+        }).join('');
+      }
+      var incs = incomesFor(y,m,income).map(function(inc){
         var d0 = inc.day ? dueDateOf(y,m,inc.day) : null, d = d0 ? shiftBy(d0, inc.holiday||'prev') : null;
-        inc.due = d0; inc.actual = d;
-        g(d ? d.toDateString() : 'month', d).inc.push(inc);
+        inc.due = d0; inc.actual = d; inc.monthOnly = !d; return inc;
       });
-      order.sort(function(a,b){ var A=groups[a].date, B=groups[b].date; if(!A) return 1; if(!B) return -1; return A-B; });
-      var html = '', doneN = 0, doneHtml = '';
-      order.forEach(function(key){
-        var gr = groups[key], d = gr.date;
-        var cls = 'ag-day'+(d && sameDay(d,today)?' today':'')+(d && d<today?' past':'');
-        var dateHtml = d
-          ? '<div class="ag-date'+(d.getDay()===6?' sat':d.getDay()===0?' sun':'')+'"><b>'+d.getDate()+'</b><span>'+WD[d.getDay()]+'</span></div>'
-          : '<div class="ag-date month"><b>月内</b><span>日付なし</span></div>';
-        var shifted = gr.pay.concat(gr.inc).filter(function(it){ return it.due && it.actual && !sameDay(it.due,it.actual); });
-        var block = '<div class="'+cls+'">'+dateHtml+'<div class="ag-items">'+
-          gr.inc.map(incRowHtml).join('')+gr.pay.map(function(it){ return payRowHtml(it,false); }).join('')+
-
-          '</div></div>';
-        html += block;
-      });
-
+      var pays = items.filter(function(it){ return !(isEmptyBill(it) && mkNum(it.mk) < mkNum(monthKey())); });
+      var incTotal = incs.reduce(function(s,i){ return s+i.amount; },0);
+      var payTotal = pays.reduce(function(s,i){ return s+i.amount; },0);
       document.getElementById('payList').innerHTML =
-        '<div class="grp"><div class="grp-head"><span>'+(m+1)+'月の予定</span><span>収入 <b class="num inc">'+yen(incomesFor(y,m,income).reduce(function(s,i){return s+i.amount;},0))+'</b></span></div>'+
-        '<div class="card agenda">'+(html || '<div class="empty-card">設定で固定収入・固定支出・支払い方法を登録すると、ここに並ぶ</div>')+
-        '<button class="row-add" id="extraAddBtn" style="--c:var(--accent-a)">＋ 臨時収入を追加</button></div></div>';
+        '<div class="grp"><div class="grp-head"><span>収入</span><b class="num">'+yen(incTotal)+'</b></div>'+
+        '<div class="card agenda inc-card">'+(incs.length ? agenda(incs, incRowHtml) : '<div class="empty-card">設定で固定収入を登録すると、ここに並ぶ</div>')+
+        '<button class="row-add" id="extraAddBtn">＋ 臨時収入を追加</button></div></div>'+
+        '<div class="grp"><div class="grp-head"><span>請求</span><b class="num">'+yen(payTotal)+'</b></div>'+
+        '<div class="card agenda">'+(pays.length ? agenda(pays, function(it){ return payRowHtml(it,false); }) : '<div class="empty-card">設定で固定支出・支払い方法を登録すると、ここに並ぶ</div>')+'</div></div>'+
+        '<div class="pay-balance"><span>収入 − 請求</span><b class="num">'+(incTotal-payTotal<0?'−':'')+yen(Math.abs(incTotal-payTotal))+'</b></div>';
     });
   }
   // 支払いタブ：再描画で上部が増減しても、見ている位置を動かさない（Safariは overflow-anchor 非対応のため手動）
@@ -2449,10 +2577,15 @@
   }
   document.getElementById('view2').addEventListener('click', function(e){
     if(e.target.closest('#extraAddBtn')){ openEditSheet('extra', null, monthKey(monthOffsetDate(payOffset))); return; }
-    var ed = e.target.closest('[data-edit]');
+    var row = e.target.closest('.pay-row');
+    if(row && row.hasAttribute('data-pay-key') && e.target.closest('.chk')){
+      var restore = payAnchor(row);
+      togglePaid(row.getAttribute('data-pay-key'), row.getAttribute('data-mk')).then(renderAll).then(restore);
+      return;
+    }
+    var ed = e.target.closest('[data-edit]') || (row && row.querySelector('[data-edit]'));
     if(ed){ openEditSheet(ed.getAttribute('data-edit'), ed.getAttribute('data-id'), ed.getAttribute('data-mk')); return; }
-    var row = e.target.closest('.pay-row[data-pay-key]'); if(!row) return;
-    var restore = payAnchor(row);
+    return;
     togglePaid(row.getAttribute('data-pay-key'), row.getAttribute('data-mk')).then(renderAll).then(restore);
   });
   document.getElementById('payPrev').addEventListener('click', function(){ if(payOffset>-24){ payOffset -= 1; refreshPay(); } });
@@ -2500,12 +2633,16 @@
     document.getElementById('esBreak').innerHTML = breakHtml;
     var rs = document.getElementById('esReset'); rs.hidden = !reset; rs.textContent = reset;
     document.getElementById('editSheet').hidden = false;
+    var amtEl = document.getElementById('esAmount');
+    amtEl.value = amount==='' ? '' : String(amount);
+    var focusEl = (type==='extra' && !id) ? nm : amtEl;
+    try{ focusEl.focus(); if(focusEl===amtEl) amtEl.setSelectionRange(0, amtEl.value.length); }catch(err){}
   }
   function closeSheet(){ document.getElementById('editSheet').hidden = true; sheet = null; }
   document.getElementById('esCancel').addEventListener('click', closeSheet);
   document.getElementById('esSave').addEventListener('click', function(){
     if(!sheet) return;
-    var amt = parseInt(document.getElementById('esAmount').value,10);
+    var amt = toInt(document.getElementById('esAmount').value);
     if(!(amt>=0)) return;
     var op;
     if(sheet.type==='extra'){
@@ -2784,9 +2921,9 @@
   function clearStore(s){ return new Promise(function(res,rej){ var r=tx(s,'readwrite').clear(); r.onsuccess=function(){res();}; r.onerror=rej; }); }
   function renderLastExport(){
     var el = document.getElementById('lastExportLbl'); if(!el) return;
-    if(!meta.lastExport){ el.textContent = 'まだ書き出していない'; return; }
-    var d = new Date(meta.lastExport), days = Math.round((todayMidnight() - new Date(d.getFullYear(), d.getMonth(), d.getDate()))/86400000);
-    el.textContent = md(d)+'（'+WD[d.getDay()]+'）'+(days===0 ? '・今日' : '・'+days+'日前');
+    if(!meta.lastExport){ el.textContent = '前回書き出し日：未'; return; }
+    var d = new Date(meta.lastExport);
+    el.textContent = '前回書き出し日：'+d.getFullYear()+'/'+md(d);
   }
   function markExported(){ meta.lastExport = new Date().toISOString(); return put('settings', meta).then(renderLastExport); }
   document.getElementById('exportBtn').addEventListener('click', function(){
@@ -2809,6 +2946,8 @@
       markExported();
     });
   });
+  document.getElementById('privacyBtn').addEventListener('click', function(){ document.getElementById('privacyModal').hidden = false; document.querySelector('#privacyModal .modal-sheet').scrollTop = 0; });
+  document.getElementById('privacyClose').addEventListener('click', function(){ document.getElementById('privacyModal').hidden = true; });
   document.getElementById('importBtn').addEventListener('click', function(){ document.getElementById('importFile').click(); });
   document.getElementById('importFile').addEventListener('change', function(e){
     var file = e.target.files[0]; e.target.value=''; if(!file) return;
@@ -2863,13 +3002,19 @@
   function buildDonut(arr, total){
     if(total<=0) return '';
     var r=50, C=2*Math.PI*r, cum=0, segs='';
-    var gap = arr.length > 1 ? 1.6 : 0;   // 区切りの隙間（同じ色が隣り合っても境目が見える）
+    // 区切りは「隙間」ではなく、平行な白い線を境目ごとに重ねて描く（角度に関係なく同じ太さに見える）
+    var seps = '';
     arr.forEach(function(ct){
-      var dash = ct.amount/total*C, d = Math.max(0.6, dash - gap);
-      segs += '<circle cx="60" cy="60" r="'+r+'" fill="none" stroke="'+ct.color+'" stroke-width="18" stroke-dasharray="'+d.toFixed(2)+' '+(C-d).toFixed(2)+'" stroke-dashoffset="'+(-cum).toFixed(2)+'"/>';
+      var dash = ct.amount/total*C;
+      segs += '<circle cx="60" cy="60" r="'+r+'" fill="none" stroke="'+ct.color+'" stroke-width="18" stroke-dasharray="'+dash.toFixed(3)+' '+(C-dash).toFixed(3)+'" stroke-dashoffset="'+(-cum).toFixed(3)+'"/>';
+      if(arr.length > 1){
+        var a = cum / C * 2 * Math.PI, ca = Math.cos(a), sa = Math.sin(a);
+        seps += '<line x1="'+(60+39.5*ca).toFixed(3)+'" y1="'+(60+39.5*sa).toFixed(3)+'" x2="'+(60+60.5*ca).toFixed(3)+'" y2="'+(60+60.5*sa).toFixed(3)+'"/>';
+      }
       cum += dash;
     });
-    return '<svg viewBox="0 0 120 120" width="150" height="150"><g transform="rotate(-90 60 60)">'+segs+'</g></svg>';
+    segs += '<g stroke="var(--card)" stroke-width="1.8" stroke-linecap="butt">'+seps+'</g>';
+    return '<svg viewBox="0 0 120 120" width="150" height="150" shape-rendering="geometricPrecision"><g transform="rotate(-90 60 60)">'+segs+'</g></svg>';
   }
   function refreshReport(){
     return Promise.all([getAll('categories'), getAll('transactions')]).then(function(res){
@@ -2919,7 +3064,7 @@
         var done = agg && agg.amount===Math.round(yearTotal/12);
         var b = document.getElementById('savApplyBtn');
         b.classList.toggle('done', !!done);
-        document.getElementById('savApplyLbl').textContent = done ? '固定支出に反映済み ✓' : '固定支出に反映';
+        document.getElementById('savApplyLbl').textContent = done ? '反映済み ✓' : '固定支出に反映';
       });
     });
   }
@@ -3033,15 +3178,18 @@
     openItemSheet('savings', null);
   });
   document.getElementById('savApplyBtn').addEventListener('click', function(){
+    if(this.classList.contains('done')) return;
     getAll('savingsItems').then(function(items){
       var yearTotal = items.reduce(function(sum,s){ return sum + s.amount/(s.periodYears||1); },0);
-      return put('fixedCosts', {id:'savings-agg', name:'積立(年間支出への備え)', amount:Math.round(yearTotal/12), dueDay:null, fromSavings:true, variable:false});
+      return put('fixedCosts', {id:'savings-agg', name:'積立（大きな出費への備え）', amount:Math.round(yearTotal/12), dueDay:null, fromSavings:true, variable:false});
     }).then(function(){ showToast('固定支出に反映しました'); return renderAll(); });
   });
 
+
+
   // ---- タブ ----
   var VIEW_COUNT = 4;
-  var currentView = 0;
+  var currentView = 1;   // 起動時はホーム（左に履歴、右に支払い・設定）
   var shell = document.getElementById('shell');
   function updateActiveTab(){
     document.querySelectorAll('.tabbar button').forEach(function(b){
@@ -3185,6 +3333,7 @@
   if(navigator.storage && navigator.storage.persist){ try{ navigator.storage.persist(); }catch(err){} }
   updateActiveTab();
   renderAmount();
+  (function(){ var sh = document.getElementById('shell'); var jump = function(){ sh.scrollLeft = currentView * sh.clientWidth; }; jump(); requestAnimationFrame(jump); setTimeout(jump, 60); })();
 
   openDB().then(function(_db){ db=_db; return seedIfEmpty(); })
     .then(loadMeta)
