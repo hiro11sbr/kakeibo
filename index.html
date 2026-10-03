@@ -1255,6 +1255,98 @@
     background:var(--c) !important; color:#fff !important; font-size:13px !important; font-weight:700; box-shadow:0 2px 8px color-mix(in srgb, var(--c) 35%, transparent); }
   .sec-add:active{ transform:scale(.96); background:color-mix(in srgb, var(--c) 85%, #000) !important; }
 
+  .sheet-form .fld[hidden], .dateset[hidden]{ display:none !important; }
+
+  /* v44：同じ日に複数口座から引落のときの内訳 */
+  #payChip2 .dl-accts{ margin-top:10px; border-top:1px solid rgba(255,255,255,.22); padding-top:6px; }
+  #payChip2 .dl-acct{ display:flex; align-items:baseline; gap:8px; padding:4px 0; font-size:12px; }
+  #payChip2 .dl-acct .an{ flex:none; font-weight:700; }
+  #payChip2 .dl-acct .ai{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:rgba(255,255,255,.65); font-size:11px; }
+  #payChip2 .dl-acct b{ flex:none; font-size:15px; }
+
+  /* v46：支払いのガラスカードは口座ごと。要確認は全カードの下に1つ */
+  #payChip2{ display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+  #payChip2:empty{ display:none; }
+  #payChip2 .glass-chip{ margin-top:0 !important; padding:12px 16px; }
+  #payChip2 .dl-card .dl-col .amount{ font-size:26px; }
+  #payChip2 .dl-card .dl-col.r b{ font-size:19px; margin-top:4px; }
+  .dl-check-out{ text-align:center; margin-top:2px; }
+  .dl-check-out .dl-check{ display:inline-block !important; margin:0 !important; }
+
+  /* v46：支払い方法の一覧は「項目：値」の概要表示 */
+  .lr-sub .kv{ display:inline-flex; align-items:baseline; gap:3px; margin-right:10px; white-space:nowrap; }
+  .lr-sub .kv i{ font-style:normal; font-size:10px; color:var(--ink-faint); }
+
+  /* v47：期限を左、金額を右に */
+  #payChip2 .dl-card .dl-col .dl-dt{ font-size:19px; font-weight:800; line-height:1.1; margin-top:4px; }
+  #payChip2 .dl-card .dl-col:first-child .cap{ font-weight:600; color:rgba(255,255,255,.9); }
+  #payChip2 .dl-card .dl-col.r .amount{ font-size:26px; font-weight:700; line-height:1.1; }
+  #payChip2 .dl-card .dl-col.r .cap{ margin-top:5px; padding-top:0; font-weight:500; color:rgba(255,255,255,.78); }
+
+  /* v48：期限が近い支払いのカード。左からにじむ暖色がゆっくり明滅し、金額は琥珀色 */
+  #payChip2 .dl-card{ position:relative; overflow:hidden; border-color:rgba(255,180,80,.55) !important; }
+  #payChip2 .dl-card::before{ content:""; position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(90deg, rgba(255,159,10,.38), rgba(255,159,10,0) 62%); animation:dlGlow 2.4s ease-in-out infinite; }
+  #payChip2 .dl-card > *{ position:relative; }
+  #payChip2 .dl-card .dl-col.r .amount{ color:#FFC266; }
+  @keyframes dlGlow{ 0%,100%{ opacity:0; } 50%{ opacity:1; } }
+  @media (prefers-reduced-motion: reduce){ #payChip2 .dl-card::before{ animation:none; opacity:.7; } }
+
+  /* v49：期限と金額を同じ行で上下中央に揃え、補足はその直下に寄せる。カードは少し低く */
+  #payChip2 .dl-card{ padding:9px 15px 10px !important; }
+  #payChip2 .dl2{ display:grid; grid-template-columns:1fr auto; column-gap:12px; row-gap:1px; align-items:center; }
+  #payChip2 .dl2-date{ font-size:19px; font-weight:800; line-height:1.15; }
+  #payChip2 .dl2-amt{ font-size:25px !important; font-weight:700; line-height:1.15; text-align:right; color:#FFC266; }
+  #payChip2 .dl2-cap{ font-size:11px; line-height:1.3; font-weight:600; color:rgba(255,255,255,.9); }
+  #payChip2 .dl2-cap.r{ text-align:right; font-weight:500; color:rgba(255,255,255,.78); }
+
+  /* v50：期限が今日・過ぎたカードは赤みに。口座は色付きのマーク */
+  #payChip2 .dl-card.urgent{ border-color:rgba(255,110,95,.75) !important; }
+  #payChip2 .dl-card.urgent::before{ background:linear-gradient(90deg, rgba(255,80,70,.45), rgba(255,80,70,0) 65%); }
+  #payChip2 .dl-card.urgent .dl2-amt{ color:#FF9C90; }
+  .acct-mark{ display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:6px; color:#fff; font-size:11px; font-weight:800; line-height:1; vertical-align:middle;
+    box-shadow:0 0 0 1px rgba(255,255,255,.35); }
+  .acct-mark.self{ background:rgba(255,255,255,.25); }
+  #payChip2 .dl2-cap.r{ display:flex; justify-content:flex-end; }
+  #setAcctList .acct-mark{ width:28px; height:28px; border-radius:8px; font-size:13px; box-shadow:none; }
+  .acct-sw{ width:14px; height:14px; border-radius:50%; flex:none; }
+  .ac-palette{ display:grid; grid-template-columns:repeat(5,1fr); gap:12px; padding:10px 6px 4px; }
+  .ac-col{ width:44px; height:44px; border-radius:12px; border:none; justify-self:center; }
+  .ac-col.on{ box-shadow:0 0 0 3px var(--card), 0 0 0 5px var(--ink); }
+
+  /* v51：点滅カードの口座は、口座名を色付きのタグで */
+  .acct-tag{ display:inline-flex; align-items:center; height:19px; padding:0 8px; border-radius:6px; color:#fff; font-size:11px; font-weight:700; line-height:1;
+    box-shadow:0 0 0 1px rgba(255,255,255,.3); white-space:nowrap; }
+  .acct-tag.self{ background:rgba(255,255,255,.22); }
+
+  /* v52：マーク・タグの文字を上下左右の中央に（行の高さ＝マークの高さ） */
+  .acct-tag{ display:inline-block !important; height:20px !important; line-height:20px !important; padding:0 8px !important; text-align:center; vertical-align:middle; }
+  .acct-mark{ display:inline-block !important; text-align:center; line-height:20px !important; vertical-align:middle; }
+  #setAcctList .acct-mark{ line-height:28px !important; flex:none; }
+
+  /* v52：期限が今日・過ぎたカードはビビッドな赤 */
+  #payChip2 .dl-card.urgent{ border-color:#FF3B30 !important; }
+  #payChip2 .dl-card.urgent::before{ background:linear-gradient(90deg, rgba(255,45,35,.62), rgba(255,45,35,0) 68%) !important; }
+  #payChip2 .dl-card.urgent .dl2-amt{ color:#FF5A4F !important; }
+
+  /* v53：引落口座は登録制。支払い方法では口座タグから選ぶ */
+  #setAcctList .lrow .acct-tag{ height:24px !important; line-height:24px !important; font-size:13px; padding:0 10px !important; box-shadow:none; }
+  .ac-label{ font-size:11px; font-weight:600; color:var(--ink-soft); margin:12px 2px 0; }
+  .acct-pick .ap-list{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+  .acct-pick .ap{ border:none; height:28px !important; line-height:28px !important; padding:0 12px !important; font-size:13px; opacity:.45; box-shadow:none; }
+  .acct-pick .ap.on{ opacity:1; box-shadow:0 0 0 2px var(--card), 0 0 0 4px var(--ink); }
+  .acct-pick .ap-empty{ font-size:12px; color:var(--ink-soft); }
+  .acct-pick[hidden]{ display:none !important; }
+
+  /* v55：設定の見出しの説明文 */
+  .band-desc{ position:relative; margin:8px 0 0; font-size:12.5px; line-height:1.7; color:rgba(255,255,255,.92); word-break:keep-all; overflow-wrap:anywhere; max-width:30em; }
+  #view3 .band{ padding-bottom:18px; }
+
+  #view0 .cat-grid{ grid-template-columns:repeat(6, minmax(0,1fr)) !important; }
+  .mcat-grid{ grid-template-columns:repeat(auto-fill, minmax(62px, 1fr)); }
+
+  #view0 .cat-btn span:last-child{ display:block; width:100%; text-align:center; }
+
   /* タブバー：すりガラス */
   nav.tabbar{ background:color-mix(in srgb, var(--card) 78%, transparent); border-top:1px solid var(--hair);
     backdrop-filter:saturate(1.6) blur(20px); -webkit-backdrop-filter:saturate(1.6) blur(20px); }
@@ -1331,7 +1423,7 @@
           <div class="band-title"><div class="t" id="payTitle">今月</div></div>
           <button class="gbtn" id="payNextBtn">›</button>
         </div>
-        <div class="glass-chip" id="payChip2"></div>
+        <div id="payChip2"></div>
       </div>
       <div class="body">
         <div id="payAlert"></div>
@@ -1346,6 +1438,7 @@
         <span class="band-mark" data-icon="gear"></span>
         <header class="top-space"></header>
         <div class="band-nav"><div class="band-title left"><div class="t">設定</div></div></div>
+        <p class="band-desc">固定の<wbr>収入と<wbr>支出、<wbr>支払い方法を<wbr>ここで<wbr>登録しよう。<wbr>ホームの<wbr>「使える額」と<wbr>支払いタブの<wbr>予定は、<wbr>ここの<wbr>内容から<wbr>自動で<wbr>計算される。</p>
               </div>
       <div class="body">
 
@@ -1361,11 +1454,18 @@
           <button type="button" class="sec-add" id="setFixedAddBtn">＋ 追加</button>
         </section>
 
+        <section class="sec" style="--c:#455A64">
+          <div class="sec-head"><span class="sec-ic" data-icon="wallet"></span><span class="sec-title">引落口座</span></div>
+          <div class="card"><div id="setAcctList"></div></div>
+          <button type="button" class="sec-add" id="setAcctAddBtn">＋ 追加</button>
+        </section>
+
         <section class="sec" style="--c:#6E56CF">
           <div class="sec-head"><span class="sec-ic" data-icon="creditcard"></span><span class="sec-title">支払い方法</span></div>
                     <div class="card"><div id="setCardList"></div></div>
           <button type="button" class="sec-add" id="setCardAddBtn">＋ 追加</button>
         </section>
+
 
         <section class="sec" id="savSection" style="--c:#1E9E6A">
           <div class="sec-head"><span class="sec-ic" data-icon="piggy"></span><span class="sec-title">積立</span><span class="sec-total num" id="savMonthTotal">¥0</span></div>
@@ -1556,6 +1656,18 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="acctSheet" hidden>
+  <div class="modal-sheet">
+    <div class="modal-title" id="acTitle"></div>
+    <div class="tx-edit sheet-form"><label class="fld wide"><span>口座名</span><input type="text" id="acName" placeholder="例：〇〇銀行"></label></div>
+    <div class="ac-label">色</div>
+    <div class="ac-palette" id="acPalette"></div>
+    <button class="primary-btn" id="acSave">保存</button>
+    <button class="modal-cancel" id="acDelete" style="color:var(--alert);font-weight:600;">削除</button>
+    <button class="modal-cancel" id="acClose">キャンセル</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <script>
 (function(){
@@ -1634,7 +1746,7 @@
     {name:'町内会費・自治会費', hint:''},
     {name:'新聞・定期購読', hint:''}
   ];
-  var CATEGORY_ICON_CHOICES = ['food','building','gamepad','shirt','bus','cart','paw','heart','hospital','burger','star',
+  var CATEGORY_ICON_CHOICES = ['store','box','dots','food','building','gamepad','shirt','bus','cart','paw','heart','hospital','burger','star',
     'car','drink','gift','music','book','camera','phone2','moneybag','creditcard','laptop','glasses','tie','baby','flower'];
   var CATEGORY_COLORS = ['#E15B5B','#E1825B','#E1B15B','#D6C24A','#A8C24A','#6FC24A','#4AC282','#4AC2B0',
     '#4AAFC2','#4A82C2','#4A5BC2','#7A4AC2','#A84AC2','#C24A9E','#C24A6E','#8C8C8C'];
@@ -1703,7 +1815,7 @@
 
   // 変動費の標準カテゴリ（固定費になりやすい保険・税金・通信費は除外）
   var CATEGORY_PRESETS = [
-    {name:'食費', icon:'food'}, {name:'外食', icon:'burger'}, {name:'カフェ', icon:'drink'}, {name:'日用品', icon:'cart'},
+    {name:'食費', icon:'food'}, {name:'外食', icon:'burger'}, {name:'コンビニ', icon:'store'}, {name:'通販', icon:'box'}, {name:'その他', icon:'dots'}, {name:'カフェ', icon:'drink'}, {name:'日用品', icon:'cart'},
     {name:'衣服', icon:'shirt'}, {name:'美容', icon:'flower'}, {name:'医療', icon:'hospital'}, {name:'交通費', icon:'bus'},
     {name:'ガソリン', icon:'car'}, {name:'交際費', icon:'gift'}, {name:'娯楽', icon:'music'}, {name:'趣味', icon:'gamepad'},
     {name:'教育', icon:'book'}, {name:'子供', icon:'baby'}, {name:'ペット', icon:'paw'}, {name:'家電・家具', icon:'laptop'},
@@ -1814,7 +1926,7 @@
   var SEED_CATEGORIES = [
     {name:'食費(会社)', icon:'building'}, {name:'趣味', icon:'gamepad'}, {name:'洋服', icon:'shirt'},
     {name:'交通費', icon:'bus'}, {name:'食費', icon:'food'}, {name:'生活用品', icon:'cart'},
-    {name:'にゃんこ', icon:'paw'}, {name:'晴陽', icon:'heart'}, {name:'病院', icon:'hospital'},
+    {name:'にゃんこ', icon:'paw'}, {name:'子供', icon:'heart'}, {name:'病院', icon:'hospital'},
     {name:'外食', icon:'burger'}, {name:'必要', icon:'star'}
   ];
   var freshInstall = false;
@@ -1822,13 +1934,17 @@
     return count('categories').then(function(n){
       if(n>0) return;
       freshInstall = true;
-      return Promise.all(SEED_CATEGORIES.map(function(c,i){ return put('categories',{id:'c'+i, name:c.name, icon:c.icon}); }));
+      // 初めて開いたときだけ、標準カテゴリを入れておく（すでにカテゴリがある場合は何もしない）
+      var DEF = [['食費','food','#E15B5B'],['外食','burger','#E1B15B'],['コンビニ','store','#E1825B'],['日用品','cart','#4AC282'],
+                 ['通販','box','#C24A6E'],['衣服・美容','shirt','#C24A9E'],['医療','hospital','#4A82C2'],['交通・車','car','#4A5BC2'],
+                 ['交際費','gift','#A84AC2'],['趣味・娯楽','gamepad','#4AAFC2'],['その他','dots','#8C8C8C']];
+      return Promise.all(DEF.map(function(d,i){ return put('categories', {id:'c_def'+i, name:d[0], icon:d[1], color:d[2], order:i}); }));
     });
   }
 
   var NAME_TO_ICON = {
     '食費(会社)':'building','趣味':'gamepad','洋服':'shirt','交通費':'bus','食費':'food',
-    '生活用品':'cart','にゃんこ':'paw','晴陽':'heart','病院':'hospital','外食':'burger','必要':'star'
+    '生活用品':'cart','にゃんこ':'paw','子供':'heart','病院':'hospital','外食':'burger','必要':'star'
   };
   function migrateIcons(){
     return getAll('categories').then(function(cats){
@@ -1862,6 +1978,9 @@
   }
 
   ICONS.plus = '<path d="M12 5v14M5 12h14"/>';
+  ICONS.store = '<path d="M4 9l1.5-5h13L20 9"/><path d="M4 9h16v1.5a2.7 2.7 0 0 1-5.3 0 2.7 2.7 0 0 1-5.4 0A2.7 2.7 0 0 1 4 10.5V9z"/><path d="M5.5 13v7h13v-7"/><path d="M10 20v-4h4v4"/>';
+  ICONS.box = '<path d="M3 7.5l9-4.5 9 4.5-9 4.5-9-4.5z"/><path d="M3 7.5v9l9 4.5 9-4.5v-9"/><path d="M12 12v9"/>';
+  ICONS.dots = '<circle cx="6" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/>';
   ICONS.yen = '<path d="M7 4l5 7 5-7M12 11v9M8 12.5h8M8 16h8"/>';
   ICONS.wallet = '<rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="15" r="1.2"/>';
   ICONS.arrowdown = '<path d="M12 4v14M6 12l6 6 6-6"/>';
@@ -2085,6 +2204,14 @@
       btn.addEventListener('click', function(){ if(catEditing || btn.dataset.lp){ delete btn.dataset.lp; return; } saveRecord(c); });
       grid.appendChild(btn);
     });
+    // 名前が枠に収まらないときだけ、その名前の文字を小さくする
+    var fit = function(){
+      grid.querySelectorAll('.cat-btn span:last-child').forEach(function(sp){
+        sp.style.fontSize = ''; var fs = parseFloat(getComputedStyle(sp).fontSize);
+        while(sp.scrollWidth > sp.clientWidth + 1 && fs > 8.5){ fs -= 0.5; sp.style.fontSize = fs+'px'; }
+      });
+    };
+    requestAnimationFrame(fit); setTimeout(fit, 300);
   }
   // ---- ホームのカテゴリ並べ替え（iPhoneのホーム画面と同じ：長押しで編集モード→ドラッグ→完了） ----
   var catEditing = false;
@@ -2417,13 +2544,16 @@
       var fd = dayOf(f,'dueDay'), due = fd ? dueDateOf(y,m,fd) : monthEnd;
       items.push({key:f.id, mk:mk, name:f.name, amount:fixedAmt(f,mk), base:baseAmt(f,mk), overridden:getOverride(f.id,mk)!=null,
         via:(f.payId && f.payId!=='bank' && isCard(f.payId)) ? payName(f.payId) : '',
+        mode:'debit', account:(!f.payId || f.payId==='bank') ? (f.account||'') : '',
         due:due, actual:fd?shiftBy(due, holidayRule(f,'fixed')):monthEnd, monthOnly:!fd, kind:'fixed', paid:!!ctx.paidSet[f.id+'__'+mk]});
     });
     ctx.cards.forEach(function(c){
       if(!activeIn(c, mk) || (c.type||'credit')!=='credit') return;
       var bill = cardBill(c, y, m, ctx.fixed, ctx.txs);
-      var cd = dayOf(c,'dueDay'), due = cd ? dueDateOf(y,m,cd) : monthEnd;
-      items.push({key:c.id, mk:mk, name:c.name, amount:bill.amount, bill:bill, due:due, actual:cd?shiftBy(due, holidayRule(c,'method')):monthEnd,
+      var cd = dayOf(c,'dueDay'), due = cd ? dueDateOf(y,m,cd) : monthEnd, self = c.billing==='self';
+      items.push({key:c.id, mk:mk, name:c.name, amount:bill.amount, bill:bill, due:due,
+        actual:cd ? (self ? due : shiftBy(due, holidayRule(c,'method'))) : monthEnd,
+        mode:self ? 'self' : 'debit', account:self ? '' : (c.account||''),
         monthOnly:!cd, kind:'card', paid:!!ctx.paidSet[c.id+'__'+mk]});
     });
     ctx.savings.forEach(function(s){
@@ -2434,6 +2564,86 @@
     });
     return items;
   }
+  function accountsInUse(){
+    var s = {};
+    cardsCache.forEach(function(c){ if((c.type||'credit')==='credit' && c.billing!=='self' && c.account) s[c.account]=1; });
+    (payCtx && payCtx.fixed || []).forEach(function(f){ if((!f.payId || f.payId==='bank') && f.account) s[f.account]=1; });
+    return Object.keys(s);
+  }
+  // 口座の色とマーク（頭の1文字を色付きの四角で表す）
+  var ACCT_COLORS = ['#2E7D32','#C62828','#1565C0','#EF6C00','#6A1B9A','#00838F','#AD1457','#5D4037','#455A64','#9E9D24'];
+  function acctColor(name){
+    var m = (meta.acctColors||{})[name||'口座']; if(m) return m;
+    var h = 0, s = String(name||'口座'); for(var i=0;i<s.length;i++) h = (h*31 + s.charCodeAt(i)) >>> 0;
+    return ACCT_COLORS[h % ACCT_COLORS.length];
+  }
+  function acctMark(name){
+    var n = name || '口座';
+    return '<span class="acct-mark" style="background:'+acctColor(n)+'" title="'+esc(n)+'">'+esc(n.charAt(0))+'</span>';
+  }
+  function accountsAll(){
+    var s = {};
+    cardsCache.forEach(function(c){ if((c.type||'credit')==='credit' && c.billing!=='self') s[c.account||'口座']=1; });
+    ((payCtx && payCtx.fixed) || []).forEach(function(f){ if(!f.fromSavings && (!f.payId || f.payId==='bank')) s[f.account||'口座']=1; });
+    return Object.keys(s);
+  }
+  // 引落口座は設定で登録する（名前と色）。支払い方法ではここから選ぶ
+  function acctList(){
+    var list = (meta.accounts||[]).map(function(a){ return a.name; });
+    accountsAll().forEach(function(n){ if(n!=='口座' && list.indexOf(n)<0) list.push(n); });
+    return list;
+  }
+  function renderAcctList(){
+    var el = document.getElementById('setAcctList'); if(!el) return;
+    var names = acctList();
+    el.innerHTML = names.length ? names.map(function(n){
+      return '<div class="lrow" data-acct="'+esc(n)+'"><span class="acct-tag" style="background:'+acctColor(n)+'">'+esc(n)+'</span><div class="lr-main"></div></div>';
+    }).join('') : '<div class="empty-card">引落口座が未登録</div>';
+  }
+  var acctEditing = null, acctPicked = null;
+  function openAcctSheet(name){
+    acctEditing = name; acctPicked = name ? acctColor(name) : ACCT_COLORS[(meta.accounts||[]).length % ACCT_COLORS.length];
+    document.getElementById('acTitle').textContent = name ? '引落口座を編集' : '引落口座を追加';
+    document.getElementById('acName').value = name || '';
+    document.getElementById('acDelete').hidden = !name;
+    paintAcctPalette();
+    document.getElementById('acctSheet').hidden = false;
+  }
+  function paintAcctPalette(){
+    document.getElementById('acPalette').innerHTML = ACCT_COLORS.map(function(col){
+      return '<button type="button" class="ac-col'+(col===acctPicked?' on':'')+'" data-col="'+col+'" style="background:'+col+'"></button>';
+    }).join('');
+  }
+  document.getElementById('setAcctList').addEventListener('click', function(e){
+    var r = e.target.closest('.lrow[data-acct]'); if(r) openAcctSheet(r.getAttribute('data-acct'));
+  });
+  document.getElementById('setAcctAddBtn').addEventListener('click', function(){ openAcctSheet(null); });
+  document.getElementById('acPalette').addEventListener('click', function(e){
+    var b = e.target.closest('[data-col]'); if(!b) return; acctPicked = b.getAttribute('data-col'); paintAcctPalette();
+  });
+  document.getElementById('acClose').addEventListener('click', function(){ document.getElementById('acctSheet').hidden = true; });
+  document.getElementById('acSave').addEventListener('click', function(){
+    var name = document.getElementById('acName').value.trim(); if(!name) return;
+    var old = acctEditing;
+    meta.accounts = (meta.accounts||[]).filter(function(a){ return a.name!==old && a.name!==name; });
+    meta.accounts.push({name:name, color:acctPicked});
+    meta.acctColors = meta.acctColors || {}; meta.acctColors[name] = acctPicked;
+    var ops = [put('settings', meta)];
+    if(old && old!==name){   // 名前を変えたら、使っている支払い方法・固定支出も書き換える
+      cardsCache.forEach(function(c){ if(c.account===old){ c.account=name; ops.push(put('cards', c)); } });
+      ops.push(getAll('fixedCosts').then(function(fx){ return Promise.all(fx.filter(function(f){ return f.account===old; }).map(function(f){ f.account=name; return put('fixedCosts', f); })); }));
+    }
+    document.getElementById('acctSheet').hidden = true;
+    Promise.all(ops).then(renderAll);
+  });
+  document.getElementById('acDelete').addEventListener('click', function(){
+    var name = acctEditing; if(!name) return;
+    var used = cardsCache.some(function(c){ return c.account===name; }) || ((payCtx&&payCtx.fixed)||[]).some(function(f){ return f.account===name; });
+    if(used){ showToast('使用中の口座は削除できません'); return; }
+    meta.accounts = (meta.accounts||[]).filter(function(a){ return a.name!==name; });
+    document.getElementById('acctSheet').hidden = true;
+    put('settings', meta).then(renderAll);
+  });
   function isEmptyBill(it){ return it.kind==='card' && it.amount===0 && !it.bill.confirmed; }
   function payRowHtml(it, withMonth){
     var today = todayMidnight();
@@ -2441,9 +2651,10 @@
     var sub = '', tag = '';
     if(withMonth){
       sub = it.mk.split('-')[1]+'月分・'+(it.monthOnly?'月内':it.due.getDate()+'日引落');
-    } else if(it.kind==='card'){ tag = it.bill.confirmed ? '' : '見込み'; }
+    } else if(it.kind==='card'){ tag = it.bill.confirmed ? '' : '見込み'; if(it.mode==='self') sub = '自分で支払う'; }
     else if(it.kind==='sav'){ tag = '年払い'; }
     else { if(it.overridden) tag = '今月変更'; if(it.via) sub = it.via; }
+    if(!withMonth && it.account && accountsInUse().length > 1) sub = (sub ? sub+'・' : '')+it.account;
     if(!withMonth && it.due && it.actual && !sameDay(it.due, it.actual)) sub = (sub ? sub+'・' : '')+it.due.getDate()+'日が休日のため'+(it.actual<it.due?'繰り上げ':'繰り下げ');
     var editType = it.kind==='card' ? 'card' : (it.kind==='fixed' ? 'fixed' : '');
     var amt = editType
@@ -2493,33 +2704,50 @@
         if(cand.length){
           // 引落日ごとにまとめ、引落日の前日を入金の期限とする（当日朝に引き落とされても間に合うように）
           cand.sort(function(a,b){ return a.actual-b.actual; });
-          var dgroups = [];
+          var dgroups = [], gmap = {};
           cand.forEach(function(it){
-            var last = dgroups[dgroups.length-1];
-            if(last && sameDay(last.date, it.actual)) last.items.push(it); else dgroups.push({date:it.actual, items:[it]});
+            var gk = it.actual.toDateString()+'|'+(it.mode||'debit')+'|'+(it.account||'');
+            if(!gmap[gk]){ gmap[gk] = {date:it.actual, key:gk, mode:it.mode||'debit', account:it.account||'', items:[]}; dgroups.push(gmap[gk]); }
+            gmap[gk].items.push(it);
           });
           var fmt = function(d){ return md(d)+'（'+WD[d.getDay()]+'）'; };
           var deadlineOf = function(d){ var x = new Date(d); x.setDate(x.getDate()-1); return x; };   // 引落日の前日
-          var g0 = dgroups[0], sum0 = g0.items.reduce(function(s,i){return s+i.amount;},0);
-          var dl0 = deadlineOf(g0.date);
-          var dlBig, dlSmall;
-          if(dl0 < today){ dlBig = sameDay(g0.date,today) ? '本日引落' : '今すぐ'; dlSmall = '口座に準備'; }
-          else { dlBig = fmt(dl0); dlSmall = 'までに口座に準備'; }
-          var names = g0.items.map(function(i){ return i.name; });
-          var nameTxt = names.slice(0,2).join('・')+(names.length>2 ? ' ほか'+(names.length-2)+'件' : '');
-          var pend = g0.items.some(function(it){ return it.kind==='card' && !it.bill.confirmed; });
-          chip = '<div class="dl-grid">'+
-              '<div class="dl-col"><span class="amount num">'+yen(sum0)+'</span><span class="cap">'+fmt(g0.date)+'引落・'+esc(nameTxt)+(pend?'（見込み含む）':'')+'</span></div>'+
-              '<div class="dl-col r"><b class="num">'+dlBig+'</b><span class="cap">'+dlSmall+'</span></div>'+
-            '</div>'+
-            '<div class="dl-check">'+(pend ? '入金前に、カード明細で請求額を確認' : '入金前に、請求額を最終確認')+'</div>';
+          // 期限 = 口座引落は引落日の前日、自分で払うものは支払期限の当日
+          // 期限まで14日以内に入ったら、口座ごと（自分で払うものは1枚）にカードを出す。全部チェックすると消える
+          var byAcct = {}, cards = [];
+          dgroups.forEach(function(g){
+            g.dl = g.mode==='self' ? new Date(g.date) : deadlineOf(g.date);
+            if(Math.round((g.dl - today)/86400000) > 14) return;   // 期限の2週間前から表示
+            // 口座ごと・期限ごとに1枚（同じ口座でも期限が違えば別のカード）
+            var k = (g.mode==='self' ? 'self' : 'acct|'+(g.account||''))+'|'+g.dl.toDateString();
+            if(!byAcct[k]){ byAcct[k] = {mode:g.mode, account:g.account, dl:g.dl, sum:0, n:0, pend:false}; cards.push(byAcct[k]); }
+            var c = byAcct[k];
+            if(g.dl < c.dl) c.dl = g.dl;
+            g.items.forEach(function(it){ c.sum += it.amount; c.n++; if(it.kind==='card' && !it.bill.confirmed) c.pend = true; });
+          });
+          cards.sort(function(a,b){ return a.dl - b.dl; });
+          // 大は小を兼ねる：同じ口座の後の期限のカードには、それより前の期限の未払い分も含める（チェックすると前のカードは消え、後のカードからも減る）
+          var run = {};
+          cards.forEach(function(c){ var k = c.mode==='self' ? 'self' : 'acct|'+(c.account||''); run[k] = (run[k]||0) + c.sum; c.total = run[k]; });
+          var anyDebit = cards.some(function(c){ return c.mode!=='self'; });
+          chip = cards.map(function(c){
+            var past = c.dl < today, isToday = sameDay(c.dl,today), self = c.mode==='self';
+            var big = past ? '今すぐ' : (isToday ? '今日' : fmt(c.dl));
+            var small = (past||isToday ? '' : 'までに')+(self ? '支払う' : '入金');
+            var mark = self ? '<span class="acct-tag self">自分で支払う</span>' : '<span class="acct-tag" style="background:'+acctColor(c.account)+'">'+esc(c.account||'口座')+'</span>';
+            return '<div class="glass-chip dl-card'+(past||isToday ? ' urgent' : '')+'"><div class="dl2">'+
+              '<b class="num dl2-date">'+big+'</b><span class="amount num dl2-amt">'+yen(c.total)+'</span>'+
+              '<span class="dl2-cap">'+small+'</span><span class="dl2-cap r">'+mark+'</span>'+
+              '</div></div>';
+          }).join('');
+          if(cards.length) chip += '<div class="dl-check-out"><span class="dl-check">'+(anyDebit ? '入金前に、請求額を最終確認' : '支払い前に、請求額を最終確認')+'</span></div>';
         } else {
-          chip = '<div class="deadline">入金が必要な引落</div><div class="amount-line"><span class="amount num" style="font-size:22px">予定なし</span></div>';
+          chip = '';
         }
       } else {
         var outTotal = items.reduce(function(s,i){return s+i.amount;},0);
-        chip = '<div class="label">'+(m+1)+'月の引落合計</div><div class="amount-line"><span class="amount num">'+yen(outTotal)+'</span></div>'+
-          '<div class="calc-row">'+items.length+'件</div>';
+        chip = '<div class="glass-chip"><div class="label">'+(m+1)+'月の請求合計</div><div class="amount-line"><span class="amount num">'+yen(outTotal)+'</span></div>'+
+          '<div class="calc-row">'+items.length+'件</div></div>';
       }
       document.getElementById('payChip2').innerHTML = chip;
 
@@ -2732,7 +2960,7 @@
       var sum = g.items.reduce(function(s,f){ return s+baseAmt(f,monthKey()); },0);
       html += '<div class="subhead"><span>'+esc(g.label)+'</span></div>';
       g.items.sort(function(a,b){ return (dayOf(a,'dueDay')||99)-(dayOf(b,'dueDay')||99) || b.amount-a.amount; }).forEach(function(f){
-        var sub = [hasMonthly(f) ? '月ごと・今月' : '', (!fixedPaidByCard(f) && dayLabel(f,'dueDay')) ? dayLabel(f,'dueDay') : ''].filter(Boolean).join('・');
+        var sub = [hasMonthly(f) ? '月ごと・今月' : '', (!fixedPaidByCard(f) && dayLabel(f,'dueDay')) ? dayLabel(f,'dueDay') : '', ((!f.payId || f.payId==='bank') && f.account) ? f.account : ''].filter(Boolean).join('・');
         html += lrow('fixed', f.id, f.name, sub, baseAmt(f,monthKey()));
       });
       html += '<div class="subfoot"><span>小計</span><span class="num">'+yen(sum)+'</span></div>';
@@ -2747,15 +2975,19 @@
       return ta-tb || (a.dueDay||99)-(b.dueDay||99);
     }).map(function(c){
       var type = c.type||'credit', tl = METHOD_TYPES.filter(function(t){ return t[0]===type; })[0][1];
-      return lrow('method', c.id, c.name, tl+(type==='credit' && dayLabel(c,'dueDay') ? '・'+dayLabel(c,'dueDay')+'引落' : ''), null, '', '', c.id===defaultPay() ? '<span class="def-badge">既定</span>' : '');
+      var kv = function(k,v){ return v ? '<span class="kv"><i>'+k+'</i>'+esc(v)+'</span>' : ''; };
+      var sum = kv('種類', tl) + (type==='credit' ? (c.billing==='self'
+        ? kv('支払い','自分で') + kv('期限', dayLabel(c,'dueDay'))
+        : kv('引落口座', c.account||'口座') + kv('請求日', dayLabel(c,'dueDay'))) : '');
+      return lrow('method', c.id, c.name, sum, null, '', '', c.id===defaultPay() ? '<span class="def-badge">既定</span>' : '');
     }).join('') : '<div class="empty-card">支払い方法が未登録</div>';
   }
 
   // ---- 項目の編集シート（固定収入・固定支出・支払い方法・積立 共通） ----
   var ITEM_DEF = {
     income: {store:'income', title:'固定収入', label:'固定収入を', fields:[['name','名前','text'],['amount','金額','amt'],['day','入金日','dateset']]},
-    fixed:  {store:'fixedCosts', title:'固定支出', label:'固定支出を', fields:[['name','名前','text'],['mode','金額の決め方','mode'],['amount','金額','amt'],['monthly','月ごとの金額','months'],['payId','支払元','pay'],['dueDay','引落日','dateset']]},
-    method: {store:'cards', title:'支払い方法', label:'支払い方法を', fields:[['name','名前','text'],['type','種類','mtype'],['dueDay','引落日','dateset'],['isDefault','記録するときの既定の支払元にする','check']]},
+    fixed:  {store:'fixedCosts', title:'固定支出', label:'固定支出を', fields:[['name','名前','text'],['mode','金額の決め方','mode'],['amount','金額','amt'],['monthly','月ごとの金額','months'],['payId','支払元','pay'],['account','引き落とす口座','acct'],['dueDay','引落日','dateset']]},
+    method: {store:'cards', title:'支払い方法', label:'支払い方法を', fields:[['name','名前','text'],['type','種類','mtype'],['billing','請求の払い方','billing'],['account','引き落とす口座','acctSel'],['dueDay','支払日','dateset'],['isDefault','記録するときの既定の支払元にする','check']]},
     savings:{store:'savingsItems', title:'積立', label:'積立項目を', fields:[['name','名前','text'],['amount','金額（1回分）','amt'],['periodYears','何年ごと','num'],['dueYear','次回の年','num'],['dueMonth','次回の月','num']]}
   };
   var itemCtx = null;
@@ -2793,6 +3025,21 @@
           var on = (k==='isDefault') ? (rec.id && rec.id===defaultPay()) : !!v;
           return '<label class="fld chkrow wide" data-fk="'+k+'"><input type="checkbox" data-f="'+k+'"'+(on?' checked':'')+'><span class="cb"></span><span class="cbl">'+lab+'</span></label>';
         }
+        if(t==='billing'){
+          var bv = v || 'debit';
+          return '<label class="fld sel wide" data-fk="billing"><span>'+lab+'</span><select data-f="billing"><option value="debit"'+(bv==='debit'?' selected':'')+'>口座から引落</option><option value="self"'+(bv==='self'?' selected':'')+'>自分で支払う（コンビニ・振込など）</option></select></label>';
+        }
+        if(t==='acctSel'){
+          var names = acctList(), cur = v || '';
+          return '<div class="fld wide acct-pick" data-fk="account"><span>'+lab+'</span><input type="hidden" data-f="account" value="'+esc(cur)+'"><div class="ap-list">'+
+            (names.length ? names.map(function(n){ return '<button type="button" class="acct-tag ap'+(n===cur?' on':'')+'" data-acn="'+esc(n)+'" style="background:'+acctColor(n)+'">'+esc(n)+'</button>'; }).join('') : '<span class="ap-empty">設定の「引落口座」で口座を追加</span>')+
+            '</div></div>';
+        }
+        if(t==='acct'){
+          var known = {}; cardsCache.forEach(function(c){ if(c.account) known[c.account]=1; }); ((payCtx&&payCtx.fixed)||[]).forEach(function(x){ if(x.account) known[x.account]=1; });
+          return '<label class="fld wide" data-fk="account"><span>'+lab+'</span><input type="text" data-f="account" list="acctList" value="'+esc(v||'')+'" placeholder="例：〇〇銀行（空欄なら「口座」）">'+
+            '<datalist id="acctList">'+Object.keys(known).map(function(n){ return '<option value="'+esc(n)+'">'; }).join('')+'</datalist></label>';
+        }
         if(t==='pay') input = '<select data-f="'+k+'">'+payOptions(v||'bank','fixed')+'</select>';
         else if(t==='mtype') input = '<select data-f="'+k+'">'+METHOD_TYPES.map(function(o){ return '<option value="'+o[0]+'"'+(o[0]===(v||'credit')?' selected':'')+'>'+o[1]+'</option>'; }).join('')+'</select>';
         else if(t==='amt') input = '<input class="num" type="text" inputmode="numeric" data-f="'+k+'" value="'+(v!=null?fmtN(v):'')+'" placeholder="0">';
@@ -2812,6 +3059,14 @@
     var pay = f.querySelector('[data-f="payId"]'), mt = f.querySelector('[data-f="type"]');
     var hide = (pay && pay.value!=='bank' && isCredit(pay.value)) || (mt && mt.value!=='credit');
     if(dd) dd.hidden = !!hide;
+    var bl = f.querySelector('[data-f="billing"]'), ac = f.querySelector('[data-fk="account"]'), bf = f.querySelector('[data-fk="billing"]');
+    if(bf) bf.hidden = !!(mt && mt.value!=='credit');
+    if(ac){
+      var acHide = (pay && pay.value!=='bank') || (mt && mt.value!=='credit') || (bl && bl.value==='self');
+      ac.hidden = !!acHide;
+    }
+    var dsl = f.querySelector('[data-fk="dueDay"] .fld > span');
+    if(dsl && bl) dsl.textContent = bl.value==='self' ? '支払期限' : '請求日';
     var dtype = f.querySelector('[data-f="dtype"]');
     if(dtype){
       f.querySelector('[data-fk="dnum"]').hidden = dtype.value!=='day';
@@ -2825,6 +3080,11 @@
     }
   }
   document.getElementById('isForm').addEventListener('change', syncItemSheet);
+  document.getElementById('isForm').addEventListener('click', function(e){
+    var b = e.target.closest('[data-acn]'); if(!b) return;
+    var wrap = b.closest('.acct-pick'); wrap.querySelector('[data-f="account"]').value = b.getAttribute('data-acn');
+    wrap.querySelectorAll('.ap').forEach(function(x){ x.classList.toggle('on', x===b); });
+  });
   function closeItemSheet(){ document.getElementById('itemSheet').hidden = true; itemCtx = null; }
   document.getElementById('isCancel').addEventListener('click', closeItemSheet);
   document.getElementById('isDelete').addEventListener('click', function(){
@@ -2851,6 +3111,8 @@
     def.fields.forEach(function(fd){
       var k=fd[0], t=fd[2]; if(t==='mode' || t==='months') return;
       if(t==='check') return;
+      if(t==='billing'){ rec.billing = val('billing') || 'debit'; return; }
+      if(t==='acct' || t==='acctSel'){ var av = val('account'); rec.account = av ? av.trim() : ''; return; }
       if(t==='dateset'){
         var dt = val('dtype');
         if(dt==='end'){ rec.dayType='end'; rec[k]=31; }
@@ -3226,6 +3488,7 @@
       renderCardList();
       document.getElementById('setStartDay').value = String(startDay());
       renderLastExport();
+      setTimeout(renderAcctList, 0);
       return Promise.all([
         refreshSummary(), refreshRecords(),
         Promise.all([getAll('income'), getAll('fixedCosts')]).then(function(r){
@@ -3238,7 +3501,7 @@
   }
 
   // ---- 初期データ（個人用：Excel「金銭管理_令和8年」から変換）。一般公開する前にこの定数と applyPersonalSeed を削除する ----
-  var PERSONAL_SEED = {"app":"kakeibo","version":1,"title":"令和8年 1〜9月の固定費データ（Excel「金銭管理_令和8年」から変換）","replace":{"fixedCosts":[{"id":"fx_shoken","name":"楽天証券（積立）","amount":0,"dueDay":null,"fromSavings":false,"variable":false,"payId":"card_master"},{"id":"fx_mineo","name":"mineo（U-NEXT含む）","amount":1269,"dueDay":null,"fromSavings":false,"variable":false,"payId":"card_master"},{"id":"fx_neo","name":"ネオファースト生命","amount":1959,"dueDay":null,"fromSavings":false,"variable":false,"payId":"card_master"},{"id":"fx_povo","name":"povo","amount":650,"dueDay":null,"fromSavings":false,"variable":false,"payId":"card_master"},{"id":"fx_ytp","name":"YouTubeプレミアム","amount":2280,"dueDay":null,"fromSavings":false,"variable":false,"payId":"card_master"},{"id":"fx_amazon","name":"Amazonプライム","amount":600,"dueDay":null,"fromSavings":false,"variable":false,"payId":"card_master","createdMonth":"2026-7"},{"id":"fx_nuro","name":"NURO光","amount":5200,"dueDay":null,"fromSavings":false,"variable":false,"payId":"card_master"},{"id":"fx_denki","name":"電気（シンエナジー）","amount":27250,"dueDay":null,"fromSavings":false,"variable":false,"payId":"card_master","monthly":[30000,40000,50000,40000,30000,26000,15000,15000,20000,20000,15000,26000]},{"id":"fx_sbi","name":"SBI生命","amount":756,"dueDay":null,"fromSavings":false,"variable":false,"payId":"card_master"},{"id":"fx_anshin","name":"アンシン生命","amount":3285,"dueDay":null,"fromSavings":false,"variable":false,"payId":"card_master"},{"id":"fx_tanto","name":"車保険（タント）","amount":5820,"dueDay":null,"fromSavings":false,"variable":false,"payId":"card_master","createdMonth":"2026-3"},{"id":"fx_vel","name":"車保険（ヴェルファイア）","amount":6500,"dueDay":null,"fromSavings":false,"variable":false,"payId":"card_master","createdMonth":"2026-3"},{"id":"fx_carloan","name":"車ローン","amount":10000,"dueDay":27,"fromSavings":false,"variable":false,"payId":"bank","createdMonth":"2026-2"},{"id":"fx_hoiku","name":"保育園","amount":5600,"dueDay":27,"fromSavings":false,"variable":false,"payId":"bank"},{"id":"fx_shogaku","name":"奨学金","amount":12445,"dueDay":27,"fromSavings":false,"variable":false,"payId":"bank"},{"id":"fx_suido","name":"水道代","amount":7000,"dueDay":10,"fromSavings":false,"variable":false,"payId":"bank"},{"id":"fx_loan1","name":"住宅ローン①","amount":66423,"dueDay":27,"fromSavings":false,"variable":false,"payId":"bank"},{"id":"fx_loan2","name":"住宅ローン②","amount":26350,"dueDay":27,"fromSavings":false,"variable":false,"payId":"bank"}],"cards":[{"id":"card_rjcb","name":"楽天JCB","dueDay":27},{"id":"card_paypay","name":"PayPay JCB","dueDay":27},{"id":"card_merpay","name":"メルペイJCB","dueDay":26},{"id":"card_master","name":"楽天master","dueDay":27}],"income":[{"id":"inc_salary","name":"給料 手取り","amount":205000,"day":4},{"id":"inc_kana","name":"香菜子","amount":80000,"day":25}],"savingsItems":[{"id":"sv_fire","name":"火災保険","amount":200000,"periodYears":5,"dueYear":2028,"dueMonth":12,"checked":true},{"id":"sv_prop","name":"固定資産税","amount":150000,"periodYears":1,"dueYear":null,"dueMonth":null,"checked":true},{"id":"sv_cartax","name":"自動車税（ヴェルファイア）","amount":45000,"periodYears":1,"dueYear":null,"dueMonth":5,"checked":true},{"id":"sv_shaken","name":"車検","amount":150000,"periodYears":2,"dueYear":2026,"dueMonth":12,"checked":true}],"monthly":[{"id":"ov__fx_denki__2026-1","kind":"ov","refId":"fx_denki","mk":"2026-1","amount":50677},{"id":"ov__card_master__2026-1","kind":"ov","refId":"card_master","mk":"2026-1","amount":9190},{"id":"ov__fx_shoken__2026-1","kind":"ov","refId":"fx_shoken","mk":"2026-1","amount":3000},{"id":"ov__fx_sbi__2026-1","kind":"ov","refId":"fx_sbi","mk":"2026-1","amount":1512},{"id":"ov__fx_anshin__2026-1","kind":"ov","refId":"fx_anshin","mk":"2026-1","amount":3218},{"id":"ov__fx_povo__2026-1","kind":"ov","refId":"fx_povo","mk":"2026-1","amount":682},{"id":"ov__fx_hoiku__2026-1","kind":"ov","refId":"fx_hoiku","mk":"2026-1","amount":5405},{"id":"ov__fx_suido__2026-1","kind":"ov","refId":"fx_suido","mk":"2026-1","amount":8733},{"id":"ov__fx_loan2__2026-1","kind":"ov","refId":"fx_loan2","mk":"2026-1","amount":21741},{"id":"ov__card_paypay__2026-1","kind":"ov","refId":"card_paypay","mk":"2026-1","amount":0},{"id":"ov__card_merpay__2026-1","kind":"ov","refId":"card_merpay","mk":"2026-1","amount":15398},{"id":"ov__card_rjcb__2026-1","kind":"ov","refId":"card_rjcb","mk":"2026-1","amount":223216},{"id":"ov__inc_kana__2026-1","kind":"ov","refId":"inc_kana","mk":"2026-1","amount":50000},{"id":"ov__fx_denki__2026-2","kind":"ov","refId":"fx_denki","mk":"2026-2","amount":35262},{"id":"ov__card_master__2026-2","kind":"ov","refId":"card_master","mk":"2026-2","amount":17226},{"id":"ov__fx_nuro__2026-2","kind":"ov","refId":"fx_nuro","mk":"2026-2","amount":7278},{"id":"ov__fx_anshin__2026-2","kind":"ov","refId":"fx_anshin","mk":"2026-2","amount":3218},{"id":"ov__fx_povo__2026-2","kind":"ov","refId":"fx_povo","mk":"2026-2","amount":550},{"id":"ov__fx_carloan__2026-2","kind":"ov","refId":"fx_carloan","mk":"2026-2","amount":11168},{"id":"ov__fx_hoiku__2026-2","kind":"ov","refId":"fx_hoiku","mk":"2026-2","amount":5255},{"id":"ov__fx_suido__2026-2","kind":"ov","refId":"fx_suido","mk":"2026-2","amount":7738},{"id":"ov__fx_loan2__2026-2","kind":"ov","refId":"fx_loan2","mk":"2026-2","amount":21741},{"id":"ov__card_paypay__2026-2","kind":"ov","refId":"card_paypay","mk":"2026-2","amount":20633},{"id":"ov__card_merpay__2026-2","kind":"ov","refId":"card_merpay","mk":"2026-2","amount":0},{"id":"ov__card_rjcb__2026-2","kind":"ov","refId":"card_rjcb","mk":"2026-2","amount":325321},{"id":"ov__card_master__2026-3","kind":"ov","refId":"card_master","mk":"2026-3","amount":80169},{"id":"ov__fx_shoken__2026-3","kind":"ov","refId":"fx_shoken","mk":"2026-3","amount":3000},{"id":"ov__fx_mineo__2026-3","kind":"ov","refId":"fx_mineo","mk":"2026-3","amount":1268},{"id":"ov__fx_povo__2026-3","kind":"ov","refId":"fx_povo","mk":"2026-3","amount":1700},{"id":"ov__fx_denki__2026-3","kind":"ov","refId":"fx_denki","mk":"2026-3","amount":50677},{"id":"ov__fx_tanto__2026-3","kind":"ov","refId":"fx_tanto","mk":"2026-3","amount":5000},{"id":"ov__fx_vel__2026-3","kind":"ov","refId":"fx_vel","mk":"2026-3","amount":16000},{"id":"ov__fx_hoiku__2026-3","kind":"ov","refId":"fx_hoiku","mk":"2026-3","amount":5255},{"id":"ov__fx_suido__2026-3","kind":"ov","refId":"fx_suido","mk":"2026-3","amount":8000},{"id":"ov__fx_loan2__2026-3","kind":"ov","refId":"fx_loan2","mk":"2026-3","amount":21741},{"id":"ov__card_paypay__2026-3","kind":"ov","refId":"card_paypay","mk":"2026-3","amount":8753},{"id":"ov__card_rjcb__2026-3","kind":"ov","refId":"card_rjcb","mk":"2026-3","amount":128496},{"id":"ov__inc_kana__2026-3","kind":"ov","refId":"inc_kana","mk":"2026-3","amount":50000},{"id":"ov__card_master__2026-4","kind":"ov","refId":"card_master","mk":"2026-4","amount":72973},{"id":"ov__fx_shoken__2026-4","kind":"ov","refId":"fx_shoken","mk":"2026-4","amount":3000},{"id":"ov__fx_mineo__2026-4","kind":"ov","refId":"fx_mineo","mk":"2026-4","amount":1268},{"id":"ov__fx_povo__2026-4","kind":"ov","refId":"fx_povo","mk":"2026-4","amount":1628},{"id":"ov__fx_denki__2026-4","kind":"ov","refId":"fx_denki","mk":"2026-4","amount":39577},{"id":"ov__fx_tanto__2026-4","kind":"ov","refId":"fx_tanto","mk":"2026-4","amount":6020},{"id":"ov__fx_vel__2026-4","kind":"ov","refId":"fx_vel","mk":"2026-4","amount":8000},{"id":"ov__fx_hoiku__2026-4","kind":"ov","refId":"fx_hoiku","mk":"2026-4","amount":5765},{"id":"ov__fx_suido__2026-4","kind":"ov","refId":"fx_suido","mk":"2026-4","amount":4832},{"id":"ov__fx_loan2__2026-4","kind":"ov","refId":"fx_loan2","mk":"2026-4","amount":21741},{"id":"ov__card_paypay__2026-4","kind":"ov","refId":"card_paypay","mk":"2026-4","amount":3000},{"id":"ov__card_rjcb__2026-4","kind":"ov","refId":"card_rjcb","mk":"2026-4","amount":90000},{"id":"ov__inc_kana__2026-4","kind":"ov","refId":"inc_kana","mk":"2026-4","amount":50000},{"id":"ov__card_master__2026-5","kind":"ov","refId":"card_master","mk":"2026-5","amount":60553},{"id":"ov__fx_shoken__2026-5","kind":"ov","refId":"fx_shoken","mk":"2026-5","amount":3000},{"id":"ov__fx_mineo__2026-5","kind":"ov","refId":"fx_mineo","mk":"2026-5","amount":1270},{"id":"ov__fx_povo__2026-5","kind":"ov","refId":"fx_povo","mk":"2026-5","amount":550},{"id":"ov__fx_denki__2026-5","kind":"ov","refId":"fx_denki","mk":"2026-5","amount":28433},{"id":"ov__fx_vel__2026-5","kind":"ov","refId":"fx_vel","mk":"2026-5","amount":8000},{"id":"ov__fx_hoiku__2026-5","kind":"ov","refId":"fx_hoiku","mk":"2026-5","amount":5705},{"id":"ov__fx_suido__2026-5","kind":"ov","refId":"fx_suido","mk":"2026-5","amount":5201},{"id":"ov__fx_loan2__2026-5","kind":"ov","refId":"fx_loan2","mk":"2026-5","amount":21741},{"id":"ov__card_rjcb__2026-5","kind":"ov","refId":"card_rjcb","mk":"2026-5","amount":123656},{"id":"ov__inc_kana__2026-5","kind":"ov","refId":"inc_kana","mk":"2026-5","amount":50000},{"id":"ov__card_master__2026-6","kind":"ov","refId":"card_master","mk":"2026-6","amount":71266},{"id":"ov__fx_shoken__2026-6","kind":"ov","refId":"fx_shoken","mk":"2026-6","amount":3000},{"id":"ov__fx_mineo__2026-6","kind":"ov","refId":"fx_mineo","mk":"2026-6","amount":1268},{"id":"ov__fx_povo__2026-6","kind":"ov","refId":"fx_povo","mk":"2026-6","amount":550},{"id":"ov__fx_denki__2026-6","kind":"ov","refId":"fx_denki","mk":"2026-6","amount":23244},{"id":"ov__fx_vel__2026-6","kind":"ov","refId":"fx_vel","mk":"2026-6","amount":8000},{"id":"ov__fx_hoiku__2026-6","kind":"ov","refId":"fx_hoiku","mk":"2026-6","amount":5555},{"id":"ov__fx_suido__2026-6","kind":"ov","refId":"fx_suido","mk":"2026-6","amount":5201},{"id":"ov__fx_loan1__2026-6","kind":"ov","refId":"fx_loan1","mk":"2026-6","amount":166490},{"id":"ov__card_rjcb__2026-6","kind":"ov","refId":"card_rjcb","mk":"2026-6","amount":118007},{"id":"ov__inc_kana__2026-6","kind":"ov","refId":"inc_kana","mk":"2026-6","amount":50000},{"id":"ov__card_master__2026-7","kind":"ov","refId":"card_master","mk":"2026-7","amount":85235},{"id":"ov__fx_shoken__2026-7","kind":"ov","refId":"fx_shoken","mk":"2026-7","amount":3000},{"id":"ov__fx_mineo__2026-7","kind":"ov","refId":"fx_mineo","mk":"2026-7","amount":1268},{"id":"ov__fx_povo__2026-7","kind":"ov","refId":"fx_povo","mk":"2026-7","amount":550},{"id":"ov__fx_denki__2026-7","kind":"ov","refId":"fx_denki","mk":"2026-7","amount":15520},{"id":"ov__fx_vel__2026-7","kind":"ov","refId":"fx_vel","mk":"2026-7","amount":8000},{"id":"ov__fx_carloan__2026-7","kind":"ov","refId":"fx_carloan","mk":"2026-7","amount":25000},{"id":"ov__fx_hoiku__2026-7","kind":"ov","refId":"fx_hoiku","mk":"2026-7","amount":5405},{"id":"ov__fx_suido__2026-7","kind":"ov","refId":"fx_suido","mk":"2026-7","amount":4464},{"id":"ov__card_rjcb__2026-7","kind":"ov","refId":"card_rjcb","mk":"2026-7","amount":193930},{"id":"ov__inc_kana__2026-7","kind":"ov","refId":"inc_kana","mk":"2026-7","amount":101000},{"id":"x_r8_7_0","kind":"extra","mk":"2026-7","name":"北洋銀行（Excel収入欄）","amount":56661,"day":null},{"id":"ov__card_master__2026-8","kind":"ov","refId":"card_master","mk":"2026-8","amount":76496},{"id":"ov__fx_shoken__2026-8","kind":"ov","refId":"fx_shoken","mk":"2026-8","amount":3000},{"id":"ov__fx_mineo__2026-8","kind":"ov","refId":"fx_mineo","mk":"2026-8","amount":1268},{"id":"ov__fx_povo__2026-8","kind":"ov","refId":"fx_povo","mk":"2026-8","amount":889},{"id":"ov__fx_denki__2026-8","kind":"ov","refId":"fx_denki","mk":"2026-8","amount":13873},{"id":"ov__fx_vel__2026-8","kind":"ov","refId":"fx_vel","mk":"2026-8","amount":8000},{"id":"ov__fx_hoiku__2026-8","kind":"ov","refId":"fx_hoiku","mk":"2026-8","amount":4955},{"id":"ov__fx_suido__2026-8","kind":"ov","refId":"fx_suido","mk":"2026-8","amount":6136},{"id":"ov__card_rjcb__2026-8","kind":"ov","refId":"card_rjcb","mk":"2026-8","amount":94365},{"id":"ov__card_master__2026-9","kind":"ov","refId":"card_master","mk":"2026-9","amount":71856},{"id":"ov__fx_shoken__2026-9","kind":"ov","refId":"fx_shoken","mk":"2026-9","amount":3000},{"id":"ov__fx_mineo__2026-9","kind":"ov","refId":"fx_mineo","mk":"2026-9","amount":1268},{"id":"ov__fx_povo__2026-9","kind":"ov","refId":"fx_povo","mk":"2026-9","amount":550},{"id":"ov__fx_denki__2026-9","kind":"ov","refId":"fx_denki","mk":"2026-9","amount":17838},{"id":"ov__fx_vel__2026-9","kind":"ov","refId":"fx_vel","mk":"2026-9","amount":8000},{"id":"ov__fx_hoiku__2026-9","kind":"ov","refId":"fx_hoiku","mk":"2026-9","amount":4955},{"id":"ov__fx_suido__2026-9","kind":"ov","refId":"fx_suido","mk":"2026-9","amount":7242},{"id":"ov__fx_loan1__2026-9","kind":"ov","refId":"fx_loan1","mk":"2026-9","amount":66404},{"id":"ov__card_rjcb__2026-9","kind":"ov","refId":"card_rjcb","mk":"2026-9","amount":110999},{"id":"x_r8_6_bonus","kind":"extra","mk":"2026-6","name":"ボーナス（Excelメモ「6月分5万円」）","amount":50000,"day":null}],"paidStatus":[{"id":"card_rjcb__2026-1","fixedCostId":"card_rjcb","monthKey":"2026-1"},{"id":"fx_loan2__2026-1","fixedCostId":"fx_loan2","monthKey":"2026-1"},{"id":"fx_loan1__2026-1","fixedCostId":"fx_loan1","monthKey":"2026-1"},{"id":"fx_hoiku__2026-1","fixedCostId":"fx_hoiku","monthKey":"2026-1"},{"id":"card_paypay__2026-1","fixedCostId":"card_paypay","monthKey":"2026-1"},{"id":"card_merpay__2026-1","fixedCostId":"card_merpay","monthKey":"2026-1"},{"id":"fx_shogaku__2026-1","fixedCostId":"fx_shogaku","monthKey":"2026-1"},{"id":"fx_suido__2026-1","fixedCostId":"fx_suido","monthKey":"2026-1"},{"id":"card_master__2026-1","fixedCostId":"card_master","monthKey":"2026-1"},{"id":"card_rjcb__2026-2","fixedCostId":"card_rjcb","monthKey":"2026-2"},{"id":"fx_loan2__2026-2","fixedCostId":"fx_loan2","monthKey":"2026-2"},{"id":"fx_loan1__2026-2","fixedCostId":"fx_loan1","monthKey":"2026-2"},{"id":"fx_hoiku__2026-2","fixedCostId":"fx_hoiku","monthKey":"2026-2"},{"id":"card_paypay__2026-2","fixedCostId":"card_paypay","monthKey":"2026-2"},{"id":"card_merpay__2026-2","fixedCostId":"card_merpay","monthKey":"2026-2"},{"id":"fx_carloan__2026-2","fixedCostId":"fx_carloan","monthKey":"2026-2"},{"id":"fx_shogaku__2026-2","fixedCostId":"fx_shogaku","monthKey":"2026-2"},{"id":"fx_suido__2026-2","fixedCostId":"fx_suido","monthKey":"2026-2"},{"id":"fx_hoiku__2026-3","fixedCostId":"fx_hoiku","monthKey":"2026-3"},{"id":"fx_loan2__2026-4","fixedCostId":"fx_loan2","monthKey":"2026-4"},{"id":"fx_loan1__2026-4","fixedCostId":"fx_loan1","monthKey":"2026-4"},{"id":"fx_hoiku__2026-4","fixedCostId":"fx_hoiku","monthKey":"2026-4"},{"id":"card_paypay__2026-4","fixedCostId":"card_paypay","monthKey":"2026-4"},{"id":"fx_carloan__2026-4","fixedCostId":"fx_carloan","monthKey":"2026-4"},{"id":"fx_shogaku__2026-4","fixedCostId":"fx_shogaku","monthKey":"2026-4"},{"id":"fx_suido__2026-4","fixedCostId":"fx_suido","monthKey":"2026-4"},{"id":"card_master__2026-5","fixedCostId":"card_master","monthKey":"2026-5"},{"id":"fx_loan2__2026-5","fixedCostId":"fx_loan2","monthKey":"2026-5"},{"id":"fx_loan1__2026-5","fixedCostId":"fx_loan1","monthKey":"2026-5"},{"id":"fx_shogaku__2026-5","fixedCostId":"fx_shogaku","monthKey":"2026-5"},{"id":"card_rjcb__2026-5","fixedCostId":"card_rjcb","monthKey":"2026-5"},{"id":"fx_hoiku__2026-5","fixedCostId":"fx_hoiku","monthKey":"2026-5"},{"id":"fx_carloan__2026-5","fixedCostId":"fx_carloan","monthKey":"2026-5"},{"id":"fx_suido__2026-5","fixedCostId":"fx_suido","monthKey":"2026-5"},{"id":"card_master__2026-6","fixedCostId":"card_master","monthKey":"2026-6"},{"id":"fx_loan2__2026-6","fixedCostId":"fx_loan2","monthKey":"2026-6"},{"id":"fx_loan1__2026-6","fixedCostId":"fx_loan1","monthKey":"2026-6"},{"id":"fx_shogaku__2026-6","fixedCostId":"fx_shogaku","monthKey":"2026-6"},{"id":"card_rjcb__2026-6","fixedCostId":"card_rjcb","monthKey":"2026-6"},{"id":"fx_hoiku__2026-6","fixedCostId":"fx_hoiku","monthKey":"2026-6"},{"id":"fx_carloan__2026-6","fixedCostId":"fx_carloan","monthKey":"2026-6"},{"id":"fx_suido__2026-6","fixedCostId":"fx_suido","monthKey":"2026-6"},{"id":"fx_loan2__2026-7","fixedCostId":"fx_loan2","monthKey":"2026-7"},{"id":"fx_hoiku__2026-7","fixedCostId":"fx_hoiku","monthKey":"2026-7"},{"id":"fx_carloan__2026-7","fixedCostId":"fx_carloan","monthKey":"2026-7"},{"id":"fx_shogaku__2026-7","fixedCostId":"fx_shogaku","monthKey":"2026-7"},{"id":"fx_suido__2026-7","fixedCostId":"fx_suido","monthKey":"2026-7"},{"id":"fx_hoiku__2026-8","fixedCostId":"fx_hoiku","monthKey":"2026-8"},{"id":"fx_carloan__2026-8","fixedCostId":"fx_carloan","monthKey":"2026-8"},{"id":"fx_shogaku__2026-8","fixedCostId":"fx_shogaku","monthKey":"2026-8"},{"id":"fx_suido__2026-8","fixedCostId":"fx_suido","monthKey":"2026-8"},{"id":"fx_loan2__2026-9","fixedCostId":"fx_loan2","monthKey":"2026-9"},{"id":"fx_loan1__2026-9","fixedCostId":"fx_loan1","monthKey":"2026-9"},{"id":"fx_hoiku__2026-9","fixedCostId":"fx_hoiku","monthKey":"2026-9"},{"id":"fx_shogaku__2026-9","fixedCostId":"fx_shogaku","monthKey":"2026-9"},{"id":"fx_suido__2026-9","fixedCostId":"fx_suido","monthKey":"2026-9"}],"categories":[{"id":"c0","name":"食費(会社)","icon":"building","color":"#4A82C2"},{"id":"c1","name":"趣味","icon":"gamepad","color":"#4AC2B0"},{"id":"c10","name":"必要","icon":"star","color":"#4AC2B0"},{"id":"c2","name":"洋服","icon":"shirt","color":"#4AC2B0"},{"id":"c3","name":"交通費","icon":"bus","color":"#4A82C2"},{"id":"c4","name":"食費","icon":"food","color":"#E15B5B"},{"id":"c5","name":"生活用品","icon":"cart","color":"#E1825B"},{"id":"c6","name":"にゃんこ","icon":"paw","color":"#E15B5B"},{"id":"c7","name":"子供","icon":"heart","color":"#E15B5B"},{"id":"c8","name":"病院","icon":"hospital","color":"#E1825B"},{"id":"c9","name":"外食","icon":"burger","color":"#E1B15B"},{"id":"c_costco","name":"コストコ","icon":"cart","color":"#E1825B","payId":"card_master"}]},"meta":{"defaultPay":"card_rjcb"},"merge":{"transactions":[{"id":"tx_r8_1001a","date":"2026-10-01T03:00:00.000Z","categoryId":"c4","amount":829,"memo":"","payId":"card_rjcb"},{"id":"tx_r8_1001b","date":"2026-10-01T03:00:00.000Z","categoryId":"c5","amount":10912,"memo":"","payId":"card_rjcb"}]}};
+  var PERSONAL_SEED = null;   // 空のバージョン：初期データなし
   function isDummyState(){
     return Promise.all([getAll('fixedCosts'), getAll('cards'), getAll('income'), getAll('savingsItems')]).then(function(r){
       return r[0].every(function(f){ return /^f[0-6]$/.test(f.id) || f.id==='savings-agg'; }) &&
@@ -3249,6 +3512,7 @@
   }
   // 初回起動、または見本データのまま（自分で項目を追加・読み込みしていない）の場合だけ、一度だけ適用する
   function applyDenkiMonthly(){
+    if(!PERSONAL_SEED) return Promise.resolve();
     if(meta.denkiMonthly) return Promise.resolve();
     return getOne('fixedCosts','fx_denki').then(function(f){
       var p = Promise.resolve();
@@ -3269,6 +3533,7 @@
   }
   // 補正：初期データの古い版で始まった端末に、カテゴリの色・名前、電気代の月額、10/1の記録を後から反映（一度だけ）
   function applyPatchV2(){
+    if(!PERSONAL_SEED) return Promise.resolve();
     if(meta.patch2) return Promise.resolve();
     var want = (PERSONAL_SEED.replace||{}).categories || [];
     var oldDenki = [50677,35262,50677,39577,28433,23244,15520,13873,17838,28433,39577,45000].join(',');
@@ -3296,7 +3561,28 @@
       return Promise.all(add.map(function(w){ return put('transactions', w); }));
     }).then(function(){ meta.patch2 = true; return put('settings', meta); });
   }
+  function applyAccountPatch(){
+    if(!PERSONAL_SEED){ if(!meta.patch3){ meta.patch3 = true; return put('settings', meta); } return Promise.resolve(); }
+    if(meta.patch3) return Promise.resolve();
+    return Promise.all([getAll('cards'), getAll('fixedCosts')]).then(function(r){
+      var ops = [];
+      r[0].forEach(function(c){ if((c.type||'credit')==='credit' && !c.account && c.billing!=='self'){ c.account='北洋銀行'; ops.push(put('cards', c)); } });
+      r[1].forEach(function(f){ if(!f.fromSavings && (!f.payId || f.payId==='bank') && !f.account){ f.account='北洋銀行'; ops.push(put('fixedCosts', f)); } });
+      return Promise.all(ops);
+    }).then(function(){ meta.patch3 = true; return put('settings', meta); });
+  }
+  function registerAccounts(){
+    if(meta.accounts) return Promise.resolve();
+    return Promise.all([getAll('cards'), getAll('fixedCosts')]).then(function(r){
+      var s = {};
+      r[0].forEach(function(c){ if(c.account) s[c.account]=1; });
+      r[1].forEach(function(f){ if(f.account) s[f.account]=1; });
+      meta.accounts = Object.keys(s).map(function(n){ return {name:n, color:acctColor(n)}; });
+      return put('settings', meta);
+    });
+  }
   function applyPersonalSeed(){
+    if(!PERSONAL_SEED) return Promise.resolve();
     if(meta.r8Applied) return Promise.resolve();
     return (freshInstall ? Promise.resolve(true) : isDummyState()).then(function(go){
       if(!go){ meta.r8Applied = true; return put('settings', meta); }
@@ -3342,6 +3628,8 @@
     .then(applyDenkiMonthly)
     .then(dropUncheckedSavings)
     .then(applyPatchV2)
+    .then(applyAccountPatch)
+    .then(registerAccounts)
     .then(migrateIcons)
     .then(renderAll)
     .catch(function(err){ console.error(err); showToast('読み込みに失敗しました'); });
