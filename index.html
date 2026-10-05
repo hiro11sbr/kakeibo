@@ -1470,6 +1470,16 @@
 
   .cp-head{ font-size:12px; font-weight:800; color:var(--ink-soft); margin:12px 2px 2px; }
 
+  /* v73：月送りの矢印を内側へ（右上のヘルプと重ならないように） */
+  #view1 .band-nav, #view2 .band-nav{ padding-left:44px !important; padding-right:44px !important; }
+  /* v73：ヘルプは丸い枠をやめ、点3つだけ（矢印ボタンと見た目を分ける） */
+  .help-btn{ background:none !important; border:none !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; width:40px !important; height:30px !important; gap:4px !important; right:8px !important; }
+  .help-btn i{ width:5px !important; height:5px !important; background:#fff !important; box-shadow:0 1px 3px rgba(0,0,0,.25); }
+  .help-btn:active{ opacity:.6; transform:none !important; }
+
+  /* v74：月送りの矢印を大きく（44px＝押しやすい大きさ） */
+  #view1 .band-nav .gbtn, #view2 .band-nav .gbtn{ width:44px !important; height:44px !important; font-size:24px !important; }
+
   /* タブバー：すりガラス */
   nav.tabbar{ background:color-mix(in srgb, var(--card) 78%, transparent); border-top:1px solid var(--hair);
     backdrop-filter:saturate(1.6) blur(20px); -webkit-backdrop-filter:saturate(1.6) blur(20px); }
