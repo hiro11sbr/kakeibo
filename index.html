@@ -1478,7 +1478,10 @@
   .help-btn:active{ opacity:.6; transform:none !important; }
 
   /* v74：月送りの矢印を大きく（44px＝押しやすい大きさ） */
-  #view1 .band-nav .gbtn, #view2 .band-nav .gbtn{ width:44px !important; height:44px !important; font-size:24px !important; }
+  #view1 .band-nav .gbtn, #view2 .band-nav .gbtn{ width:36px !important; height:36px !important; font-size:0 !important; position:relative; }
+  #view1 .band-nav .gbtn::before, #view2 .band-nav .gbtn::before{ content:""; position:absolute; left:50%; top:50%; width:11px; height:11px;
+    border-left:2.6px solid #fff; border-bottom:2.6px solid #fff; border-radius:1px; transform:translate(-30%,-50%) rotate(45deg); }
+  #view1 .band-nav .gbtn:last-child::before, #view2 .band-nav .gbtn:last-child::before{ transform:translate(-70%,-50%) rotate(-135deg); }
 
   /* タブバー：すりガラス */
   nav.tabbar{ background:color-mix(in srgb, var(--card) 78%, transparent); border-top:1px solid var(--hair);
