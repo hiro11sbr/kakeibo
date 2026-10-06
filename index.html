@@ -1483,6 +1483,8 @@
     border-left:2.6px solid #fff; border-bottom:2.6px solid #fff; border-radius:1px; transform:translate(-30%,-50%) rotate(45deg); }
   #view1 .band-nav .gbtn:last-child::before, #view2 .band-nav .gbtn:last-child::before{ transform:translate(-70%,-50%) rotate(-135deg); }
 
+  .acct-pick .ap.card{ background:#6E56CF; }
+
   /* タブバー：すりガラス */
   nav.tabbar{ background:color-mix(in srgb, var(--card) 78%, transparent); border-top:1px solid var(--hair);
     backdrop-filter:saturate(1.6) blur(20px); -webkit-backdrop-filter:saturate(1.6) blur(20px); }
@@ -2371,8 +2373,18 @@
       var k = mkNum(mk) - mkNum(billMonthOf(t, card)), parts = txParts(t);
       if(k >= 0 && k < parts.length) usePart += parts[k];
     });
+    // 積立の支払い元がこのカードなら、支払月の利用として請求に含める（締め日・支払月に従う）
+    var savPart = 0;
+    ((payCtx && payCtx.savings) || []).forEach(function(sv){
+      if(sv.account!=='card:'+card.id) return;
+      for(var back=0; back<=3; back++){
+        var uk = mkFromNum(mkNum(mk)-back), u = mkYM(uk);
+        if(savingsDueIn(sv, u.y, u.m) && billMonthOf({date:new Date(u.y, u.m, 1)}, card)===mk) savPart += sv.amount;
+      }
+    });
+    usePart += savPart;
     var ov = getOverride(card.id, mk);
-    return {fixedPart:fixedPart, usePart:usePart, est:fixedPart+usePart, amount:(ov!=null?ov:fixedPart+usePart), confirmed:ov!=null, prevMonth:prev.getMonth()+1};
+    return {fixedPart:fixedPart, usePart:usePart, savPart:savPart, est:fixedPart+usePart, amount:(ov!=null?ov:fixedPart+usePart), confirmed:ov!=null, prevMonth:prev.getMonth()+1};
   }
   function migrateCards(){
     if(meta.cardsMigrated) return Promise.resolve();
@@ -2866,6 +2878,7 @@
     });
     ctx.savings.forEach(function(s){
       if(!savingsDueIn(s, y, m)) return;
+      if(String(s.account||'').indexOf('card:')===0) return;   // カード払いの積立は、そのカードの請求に含める
       var key = 'sav-'+s.id;
       items.push({key:key, mk:mk, name:s.name, amount:s.amount, due:monthEnd, actual:monthEnd, mode:s.account===CHOKIN?'chokin':'debit', account:s.account===CHOKIN?'':(s.account||''),
         monthOnly:true, kind:'sav', paid:!!ctx.paidSet[key+'__'+mk]});
@@ -2876,7 +2889,7 @@
     var s = {};
     cardsCache.forEach(function(c){ var ty = c.type||'credit'; if(((ty==='credit' && c.billing!=='self') || ty==='debit') && c.account) s[c.account]=1; });
     (payCtx && payCtx.fixed || []).forEach(function(f){ if((!f.payId || f.payId==='bank') && f.account) s[f.account]=1; });
-    (payCtx && payCtx.savings || []).forEach(function(x){ if(x.account && x.account!==CHOKIN) s[x.account]=1; });
+    (payCtx && payCtx.savings || []).forEach(function(x){ if(x.account && x.account!==CHOKIN && String(x.account).indexOf('card:')!==0) s[x.account]=1; });
     return Object.keys(s);
   }
   // 口座の色とマーク（頭の1文字を色付きの四角で表す）
@@ -3366,6 +3379,7 @@
           return '<div class="fld wide acct-pick" data-fk="account"><span>'+lab+'</span><input type="hidden" data-f="account" value="'+esc(cur)+'"><div class="ap-list">'+
             (names.length ? names.map(function(n){ return '<button type="button" class="acct-tag ap'+(n===cur?' on':'')+'" data-acn="'+esc(n)+'" style="background:'+acctColor(n)+'">'+esc(n)+'</button>'; }).join('') : (kind==='savings' ? '' : '<span class="ap-empty">設定の「引落口座」で口座を追加</span>'))+
             // 積立は「貯金」（引き出して現金で保管・別口座へ移すなど）も選べる
+            (kind==='savings' ? cardsCache.filter(function(x){ return (x.type||'credit')==='credit'; }).map(function(x){ var v = 'card:'+x.id; return '<button type="button" class="acct-tag ap card'+(cur===v?' on':'')+'" data-acn="'+v+'">'+esc(x.name)+'</button>'; }).join('') : '')+
             (kind==='savings' ? '<button type="button" class="acct-tag ap chokin'+(cur===CHOKIN?' on':'')+'" data-acn="'+CHOKIN+'">貯金</button>' : '')+
             '</div></div>';
         }
@@ -3733,7 +3747,9 @@
       document.getElementById('savingsList').innerHTML = items.map(function(s){
         var p = s.periodYears||1;
         var sub = (p>1 ? p+'年ごと' : '毎年') + (s.dueMonth ? '・次回'+(s.dueYear?s.dueYear+'年':'')+s.dueMonth+'月' : '');
-        var src = s.account===CHOKIN ? '<span class="acct-tag src-tag" style="background:#8C6D1F">貯金</span>'
+        var cardSrc = String(s.account||'').indexOf('card:')===0 ? (methodOf(s.account.slice(5))||{}).name : null;
+        var src = cardSrc ? '<span class="acct-tag src-tag" style="background:#6E56CF">'+esc(cardSrc)+'</span>'
+                : s.account===CHOKIN ? '<span class="acct-tag src-tag" style="background:#8C6D1F">貯金</span>'
                 : (s.account ? '<span class="acct-tag src-tag" style="background:'+acctColor(s.account)+'">'+esc(s.account)+'</span>' : '');
         return lrow('savings', s.id, s.name, sub, null, '', '', '<div class="lr-amt-col"><div class="lr-amt num">'+yen(s.amount)+'</div>'+src+'</div>'+DRAG_H);
       }).join('');
