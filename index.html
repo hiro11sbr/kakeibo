@@ -1499,6 +1499,10 @@
   .mgrid .fld{ padding-left:10px !important; padding-right:8px !important; }
   .mgrid .fld input{ font-size:17px !important; letter-spacing:-0.01em; }
 
+  /* v80：月ごとの欄は単位を見出し側（右上）に置き、数字に幅をすべて使う（iPhoneの文字でも6桁まで収まる） */
+  .mgrid .fld[data-unit]::after{ top:9px !important; bottom:auto !important; right:10px !important; }
+  .mgrid .fld[data-unit] input{ padding-right:0 !important; }
+
   /* タブバー：すりガラス */
   nav.tabbar{ background:color-mix(in srgb, var(--card) 78%, transparent); border-top:1px solid var(--hair);
     backdrop-filter:saturate(1.6) blur(20px); -webkit-backdrop-filter:saturate(1.6) blur(20px); }
