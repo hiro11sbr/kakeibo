@@ -1485,6 +1485,20 @@
 
   .acct-pick .ap.card{ background:#6E56CF; }
 
+  #view2 #extraOutAddBtn{ color:var(--ink-soft); font-weight:600; border-top:1px solid var(--hair); }
+  .es-src{ margin-top:12px; }
+  .es-src-h{ font-size:11px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; }
+  .es-src .ap{ border:none; height:28px !important; line-height:28px !important; padding:0 12px !important; font-size:13px; opacity:.45; box-shadow:none; }
+  .es-src .ap.on{ opacity:1; box-shadow:0 0 0 2px var(--card), 0 0 0 4px var(--ink); }
+  .es-src .ap.self{ background:#7a8597; }
+  .es-src .ap-list{ display:flex; flex-wrap:wrap; gap:8px; }
+
+  /* v79：単位は小さく右端に寄せ、数字の表示幅を確保（万単位でも見切れない） */
+  .fld[data-unit]::after{ right:9px !important; font-size:12px !important; bottom:13px !important; }
+  .fld[data-unit] input{ padding-right:1.5em !important; }
+  .mgrid .fld{ padding-left:10px !important; padding-right:8px !important; }
+  .mgrid .fld input{ font-size:17px !important; letter-spacing:-0.01em; }
+
   /* タブバー：すりガラス */
   nav.tabbar{ background:color-mix(in srgb, var(--card) 78%, transparent); border-top:1px solid var(--hair);
     backdrop-filter:saturate(1.6) blur(20px); -webkit-backdrop-filter:saturate(1.6) blur(20px); }
@@ -1747,6 +1761,7 @@
     </div>
     <div id="esBreak"></div>
     <input type="number" inputmode="numeric" id="esDay" class="memo-input" placeholder="入金日（数字のみ・任意）" style="margin-top:14px;">
+    <div id="esSrc" class="es-src" hidden></div>
     <button class="primary-btn" id="esSave">保存</button>
     <button class="modal-cancel" id="esReset" style="color:var(--accent-a);font-weight:600;"></button>
     <button class="modal-cancel" id="esCancel">キャンセル</button>
@@ -2876,6 +2891,13 @@
         mode:self ? 'self' : 'debit', account:self ? '' : (c.account||''),
         monthOnly:!cd, kind:'card', paid:!!ctx.paidSet[c.id+'__'+mk]});
     });
+    // 臨時の請求（この月だけ）
+    Object.keys(monthlyById).forEach(function(k){
+      var x = monthlyById[k]; if(x.kind!=='xout' || x.mk!==mk) return;
+      var self = x.account===XSELF, due = x.day ? dueDateOf(y,m,x.day) : monthEnd, key = 'xo-'+x.id;
+      items.push({key:key, xid:x.id, mk:mk, name:x.name, amount:x.amount, due:due, actual:due, monthOnly:!x.day, kind:'xout',
+        mode:self?'self':'debit', account:self?'':(x.account||''), paid:!!ctx.paidSet[key+'__'+mk]});
+    });
     ctx.savings.forEach(function(s){
       if(!savingsDueIn(s, y, m)) return;
       if(String(s.account||'').indexOf('card:')===0) return;   // カード払いの積立は、そのカードの請求に含める
@@ -2970,6 +2992,7 @@
     put('settings', meta).then(renderAll);
   });
   function isEmptyBill(it){ return it.kind==='card' && it.amount===0 && !it.bill.confirmed; }
+  var XSELF = '__self__';
   function payRowHtml(it, withMonth){
     var today = todayMidnight();
     var od = !it.paid && today > it.actual && !isEmptyBill(it);
@@ -2978,12 +3001,13 @@
       sub = it.mk.split('-')[1]+'月分・'+(it.monthOnly?'月内':it.due.getDate()+'日引落');
     } else if(it.kind==='card'){ tag = it.bill.confirmed ? '' : '見込み'; if(it.mode==='self') sub = '自分で支払う'; }
     else if(it.kind==='sav'){ tag = '年払い'; if(it.mode==='chokin') sub = '貯金から'; }
+    else if(it.kind==='xout'){ tag = '臨時'; if(it.mode==='self') sub = '自分で支払う'; }
     else { if(it.overridden) tag = '今月変更'; if(it.via) sub = it.via; }
     if(!withMonth && it.account && accountsInUse().length > 1) sub = (sub ? sub+'・' : '')+it.account;
     if(!withMonth && it.due && it.actual && !sameDay(it.due, it.actual)) sub = (sub ? sub+'・' : '')+it.due.getDate()+'日が休日のため'+(it.actual<it.due?'繰り上げ':'繰り下げ');
-    var editType = it.kind==='card' ? 'card' : (it.kind==='fixed' ? 'fixed' : '');
+    var editType = it.kind==='card' ? 'card' : (it.kind==='fixed' ? 'fixed' : (it.kind==='xout' ? 'xout' : ''));
     var amt = editType
-      ? '<button type="button" class="am am-edit num" data-edit="'+editType+'" data-id="'+esc(it.key)+'" data-mk="'+it.mk+'">'+yen(it.amount)+'</button>'
+      ? '<button type="button" class="am am-edit num" data-edit="'+editType+'" data-id="'+esc(it.kind==='xout' ? it.xid : it.key)+'" data-mk="'+it.mk+'">'+yen(it.amount)+'</button>'
       : '<span class="am num">'+yen(it.amount)+'</span>';
     return '<div class="pay-row'+(it.paid?' paid':'')+(od?' overdue':'')+'" data-pay-key="'+esc(it.key)+'" data-mk="'+it.mk+'">'+
       '<span class="chk'+(it.paid?' checked':'')+'"></span>'+
@@ -3106,7 +3130,8 @@
         '<div class="card agenda inc-card">'+(incs.length ? agenda(incs, incRowHtml) : '<div class="empty-card">設定で固定収入を登録すると、ここに並ぶ</div>')+
         '<button class="row-add" id="extraAddBtn">＋ 臨時収入を追加</button></div></div>'+
         '<div class="grp"><div class="grp-head"><span>請求</span><b class="num">'+yen(payTotal)+'</b></div>'+
-        '<div class="card agenda">'+(pays.length ? agenda(pays, function(it){ return payRowHtml(it,false); }) : '<div class="empty-card">設定で固定支出・支払い方法を登録すると、ここに並ぶ</div>')+'</div></div>'+
+        '<div class="card agenda out-card">'+(pays.length ? agenda(pays, function(it){ return payRowHtml(it,false); }) : '<div class="empty-card">設定で固定支出・支払い方法を登録すると、ここに並ぶ</div>')+
+        '<button class="row-add" id="extraOutAddBtn">＋ 臨時の請求を追加</button></div></div>'+
         '<div class="pay-balance"><span>収入 − 請求</span><b class="num">'+(incTotal-payTotal<0?'−':'')+yen(Math.abs(incTotal-payTotal))+'</b></div>';
     });
   }
@@ -3130,6 +3155,7 @@
   }
   document.getElementById('view2').addEventListener('click', function(e){
     if(e.target.closest('#extraAddBtn')){ openEditSheet('extra', null, monthKey(monthOffsetDate(payOffset))); return; }
+    if(e.target.closest('#extraOutAddBtn')){ openEditSheet('xout', null, monthKey(monthOffsetDate(payOffset))); return; }
     var row = e.target.closest('.pay-row');
     if(row && row.hasAttribute('data-pay-key') && e.target.closest('.chk')){
       var restore = payAnchor(row);
@@ -3148,7 +3174,7 @@
   var sheet = null, sheetOrigAmount = null;
   function openEditSheet(type, id, mk){
     var ym = mkYM(mk), mlabel = (ym.m+1)+'月';
-    var title='', note='', amount='', showName=false, showDay=false, reset='', name='', day='', breakHtml='';
+    var title='', note='', amount='', showName=false, showDay=false, reset='', name='', day='', breakHtml='', srcHtml='';
     if(type==='card'){
       var card = cardsCache.filter(function(c){return c.id===id;})[0]; if(!card) return;
       var bill = cardBill(card, ym.y, ym.m, payCtx.fixed, payCtx.txs);
@@ -3170,6 +3196,15 @@
       var inc = incomesFor(ym.y,ym.m,payCtx.income).filter(function(i){return i.id===id;})[0]; if(!inc) return;
       title = inc.name+' '+mlabel; note = 'この月だけの金額。設定の固定収入は変わらない';
       amount = inc.amount; reset = inc.overridden ? '通常の金額（'+yen(inc.base)+'）に戻す' : '';
+    } else if(type==='xout'){
+      var xo = id ? monthlyById[id] : null;
+      title = xo ? '臨時の請求を編集' : mlabel+'の臨時の請求を追加';
+      showName = showDay = true; name = xo ? xo.name : ''; amount = xo ? xo.amount : ''; day = xo && xo.day ? xo.day : '';
+      reset = xo ? 'この請求を削除' : '';
+      var names = acctList(), cur = xo ? (xo.account||'') : (names.length===1 ? names[0] : '');
+      srcHtml = '<div class="es-src-h">支払い元</div><div class="ap-list">'+names.map(function(n){ return '<button type="button" class="acct-tag ap'+(n===cur?' on':'')+'" data-xsrc="'+esc(n)+'" style="background:'+acctColor(n)+'">'+esc(n)+'</button>'; }).join('')+
+        '<button type="button" class="acct-tag ap self'+(cur===XSELF?' on':'')+'" data-xsrc="'+XSELF+'">自分で支払う</button></div>';
+      xsrcSel = cur;
     } else {
       var ex = id ? monthlyById[id] : null;
       title = ex ? '臨時収入を編集' : mlabel+'の臨時収入を追加';
@@ -3182,15 +3217,22 @@
     document.getElementById('esNote').hidden = !note;
     var nm = document.getElementById('esName'); nm.hidden = !showName; nm.value = name;
     var dy = document.getElementById('esDay'); dy.hidden = !showDay; dy.value = day;
+    dy.placeholder = type==='xout' ? '引落日・支払日（数字のみ・任意）' : '入金日（数字のみ・任意）';
+    var es = document.getElementById('esSrc'); es.hidden = !srcHtml; es.innerHTML = srcHtml;
     document.getElementById('esAmount').value = amount;
     document.getElementById('esBreak').innerHTML = breakHtml;
     var rs = document.getElementById('esReset'); rs.hidden = !reset; rs.textContent = reset;
     document.getElementById('editSheet').hidden = false;
     var amtEl = document.getElementById('esAmount');
     amtEl.value = amount==='' ? '' : String(amount);
-    var focusEl = (type==='extra' && !id) ? nm : amtEl;
+    var focusEl = ((type==='extra' || type==='xout') && !id) ? nm : amtEl;
     try{ focusEl.focus(); if(focusEl===amtEl) amtEl.setSelectionRange(0, amtEl.value.length); }catch(err){}
   }
+  var xsrcSel = '';
+  document.getElementById('esSrc').addEventListener('click', function(e){
+    var b = e.target.closest('[data-xsrc]'); if(!b) return; xsrcSel = b.getAttribute('data-xsrc');
+    this.querySelectorAll('[data-xsrc]').forEach(function(x){ x.classList.toggle('on', x===b); });
+  });
   function closeSheet(){ document.getElementById('editSheet').hidden = true; sheet = null; }
   document.getElementById('esCancel').addEventListener('click', closeSheet);
   document.getElementById('esSave').addEventListener('click', function(){
@@ -3198,7 +3240,11 @@
     var amt = toInt(document.getElementById('esAmount').value);
     if(!(amt>=0)) return;
     var op;
-    if(sheet.type==='extra'){
+    if(sheet.type==='xout'){
+      var d2 = parseInt(document.getElementById('esDay').value,10);
+      op = put('monthly', {id:sheet.id||('xo'+Date.now()), kind:'xout', mk:sheet.mk,
+        name:document.getElementById('esName').value.trim()||'臨時の請求', amount:amt, day:(d2>=1&&d2<=31)?d2:null, account:xsrcSel||''});
+    } else if(sheet.type==='extra'){
       var d = parseInt(document.getElementById('esDay').value,10);
       op = put('monthly', {id:sheet.id||('x'+Date.now()), kind:'extra', mk:sheet.mk,
         name:document.getElementById('esName').value.trim()||'臨時収入', amount:amt, day:(d>=1&&d<=31)?d:null});
@@ -3219,7 +3265,7 @@
   });
   document.getElementById('esReset').addEventListener('click', function(){
     if(!sheet) return;
-    var id = sheet.type==='extra' ? sheet.id : ovKey(sheet.id, sheet.mk);
+    var id = (sheet.type==='extra' || sheet.type==='xout') ? sheet.id : ovKey(sheet.id, sheet.mk);
     var restore = payAnchor(null);
     del('monthly', id).then(function(){ closeSheet(); return renderAll(); }).then(restore);
   });
