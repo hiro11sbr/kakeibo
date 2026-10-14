@@ -1542,7 +1542,7 @@
           <div class="label" id="heroLabel">今月使える変動費</div>
           <div class="amount-line"><span class="tiny">残り</span><span class="amount num" id="residual">¥0</span></div>
           <div class="calc-row num calc3">
-            <span class="ct"><i>来月の収入</i><span class="v" id="incomeTotal">¥0</span></span>
+            <span class="ct"><i>今月の収入</i><span class="v" id="incomeTotal">¥0</span></span>
             <span class="op">−</span>
             <span class="ct"><i>来月の固定費</i><span class="v" id="fixedTotal">¥0</span></span>
             <span class="op">−</span>
@@ -1869,7 +1869,7 @@
     </div>
     <div class="help-body" data-hb="spec" hidden>
       <h3>今月使える変動費</h3>
-      <p>来月の収入 − 来月の固定費 − 今月の支出済変動費。今月カードで使った分は来月払うので、来月の収支で計算する。分割・リボは1回分ずつ、買った月から順に各月の支出として数える。</p>
+      <p>今月の収入 − 来月の固定費 − 今月の支出済変動費。今月カードで使った分と来月の固定費は、どちらも今月の収入から払うので、この3つで計算する。分割・リボは1回分ずつ、買った月から順に各月の支出として数える。</p>
       <h3>カードの請求額</h3>
       <p>そのカード払いの固定支出 ＋ 締め日で区切った利用分。締め日までの利用は、支払月（当月・翌月・翌々月）の支払日に請求される。月末締め・翌月払いなら、前月1日〜末日の利用分が今月の請求になる。そのカードからチャージしている電子マネーの利用も含める。確定額を入れると、見込みより優先する。</p>
       <h3>入金の期限</h3>
@@ -2637,9 +2637,10 @@
     return Promise.all([getAll('income'), getAll('fixedCosts'), getAll('transactions'), getAll('savingsItems')]).then(function(res){
       var income=res[0], fixed=res[1], transactions=res[2], savings=res[3];
       var mk = curPeriodKey();
-      // 今月カードで使った分は来月払う → 来月の収入から来月の固定費を引いた額が、今月使える変動費
+      // 今月使える変動費 ＝ 今月の収入 − 来月の固定費 − 今月の支出済変動費
       var nk = mkFromNum(mkNum(mk)+1), ny = mkYM(nk);
-      var incomeTotal = incomesFor(ny.y, ny.m, income).reduce(function(s,i){return s+i.amount;},0);
+      var cy = mkYM(mk);   // 収入は今月、固定費は来月（今月の収入で来月の固定費とカード払いをまかなう）
+      var incomeTotal = incomesFor(cy.y, cy.m, income).reduce(function(s,i){return s+i.amount;},0);
       var fixedTotal = fixed.filter(function(f){ return !f.variable && activeIn(f, nk); }).reduce(function(s,f){return s+fixedAmt(f, nk);},0);
       // 来月・再来月に支払月が決まっている積立（年払い）があれば注意を出す
       var notes = [];
