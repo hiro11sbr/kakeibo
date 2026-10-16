@@ -1503,6 +1503,36 @@
   .mgrid .fld[data-unit]::after{ top:9px !important; bottom:auto !important; right:10px !important; }
   .mgrid .fld[data-unit] input{ padding-right:0 !important; }
 
+  /* v82：支払いタブ・カードの請求の内訳 */
+  .card-sub{ margin:-4px 0 6px 50px; padding:2px 0 2px 10px; border-left:2px solid var(--hair); }
+  .card-sub .cs-row{ gap:6px !important; }
+  .card-sub.paid{ opacity:.45; }
+  .card-sub .cs-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:30px; }
+  .card-sub .cs-n{ font-size:13px; color:var(--ink-soft); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .card-sub .cs-tag{ flex:none; font-style:normal; font-size:11px; font-weight:700; color:var(--ink-soft); background:var(--bg-muted); border-radius:6px; padding:1px 6px; margin-left:6px; }
+  .card-sub .cs-n{ flex:0 1 auto !important; }
+  .card-sub .cs-sp{ flex:1; }
+  .card-sub .cs-row{ justify-content:flex-start !important; }
+  .card-sub .cs-a{ flex:none; border:none; background:none; padding:2px 0; font-size:13px; font-weight:700; color:var(--ink-soft); }
+  .card-sub button.cs-a{ color:#C9782A; border-bottom:1px dashed rgba(201,120,42,.45); }
+
+  /* v83：カードの内訳は開け閉めできる */
+  .cs-toggle{ display:inline-flex; align-items:center; gap:4px; margin-top:3px; padding:2px 9px 2px 8px; border:none; border-radius:8px; background:var(--bg-muted); color:var(--ink-soft); font-size:11px; font-weight:700; width:max-content; }
+  .cs-toggle::after{ content:""; width:5px; height:5px; border-right:1.6px solid currentColor; border-bottom:1.6px solid currentColor; transform:rotate(45deg) translate(-1px,-1px); transition:transform .15s; }
+  .cs-toggle.open::after{ transform:rotate(-135deg) translate(-1px,-1px); }
+
+  /* v84：内訳の開閉は金額の右の小さな矢印（文字なし）。金額の列がそろうよう、他の行も同じ幅をあける */
+  .cs-chev{ flex:none; width:24px; height:32px; margin-right:-6px; border:none; background:none; padding:0; display:flex; align-items:center; justify-content:center; color:#7a8597; -webkit-tap-highlight-color:transparent; }
+  .cs-chev i{ width:7px; height:7px; border-right:2px solid currentColor; border-bottom:2px solid currentColor; transform:translateY(-2px) rotate(45deg); transition:transform .15s; }
+  .cs-chev.open i{ transform:translateY(2px) rotate(-135deg); }
+  .cs-chev-sp{ flex:none; width:18px; }
+  .pay-row.income .cs-chev-sp{ display:none; }
+  /* 内訳はカードの合計より小さい文字に */
+  .card-sub .cs-n{ font-size:12px !important; }
+  .card-sub .cs-a{ font-size:12px !important; font-weight:600 !important; }
+  .card-sub .cs-row{ min-height:27px !important; }
+  .card-sub{ margin-right:27px !important; }
+
   /* タブバー：すりガラス */
   nav.tabbar{ background:color-mix(in srgb, var(--card) 78%, transparent); border-top:1px solid var(--hair);
     backdrop-filter:saturate(1.6) blur(20px); -webkit-backdrop-filter:saturate(1.6) blur(20px); }
@@ -2891,7 +2921,11 @@
       if(!activeIn(c, mk) || (c.type||'credit')!=='credit') return;
       var bill = cardBill(c, y, m, ctx.fixed, ctx.txs);
       var cd = dayOf(c,'dueDay'), due = cd ? dueDateOf(y,m,cd) : monthEnd, self = c.billing==='self';
-      items.push({key:c.id, mk:mk, name:c.name, amount:bill.amount, bill:bill, due:due,
+      // このカードで払う固定支出（チャージ元がこのカードの電子マネー払いも含む）を内訳として持つ
+      var viaC = {}; viaC[c.id] = 1; cardsCache.forEach(function(x){ if(x.type==='emoney' && x.chargeFrom===c.id) viaC[x.id] = 1; });
+      var fx = ctx.fixed.filter(function(f){ return !f.fromSavings && viaC[f.payId] && activeIn(f, mk); })
+        .map(function(f){ return {id:f.id, name:f.name, amount:fixedAmt(f,mk), overridden:getOverride(f.id,mk)!=null}; });
+      items.push({key:c.id, mk:mk, name:c.name, amount:bill.amount, bill:bill, fx:fx, due:due,
         actual:cd ? (self ? due : shiftBy(due, holidayRule(c,'method'))) : monthEnd,
         mode:self ? 'self' : 'debit', account:self ? '' : (c.account||''),
         monthOnly:!cd, kind:'card', paid:!!ctx.paidSet[c.id+'__'+mk]});
@@ -3010,13 +3044,29 @@
     else { if(it.overridden) tag = '今月変更'; if(it.via) sub = it.via; }
     if(!withMonth && it.account && accountsInUse().length > 1) sub = (sub ? sub+'・' : '')+it.account;
     if(!withMonth && it.due && it.actual && !sameDay(it.due, it.actual)) sub = (sub ? sub+'・' : '')+it.due.getDate()+'日が休日のため'+(it.actual<it.due?'繰り上げ':'繰り下げ');
+    var hasSub = !withMonth && it.kind==='card' && ((it.fx&&it.fx.length) || it.bill.usePart);
+    var opened = hasSub && openCardSubs[it.key+'__'+it.mk];
     var editType = it.kind==='card' ? 'card' : (it.kind==='fixed' ? 'fixed' : (it.kind==='xout' ? 'xout' : ''));
     var amt = editType
       ? '<button type="button" class="am am-edit num" data-edit="'+editType+'" data-id="'+esc(it.kind==='xout' ? it.xid : it.key)+'" data-mk="'+it.mk+'">'+yen(it.amount)+'</button>'
       : '<span class="am num">'+yen(it.amount)+'</span>';
     return '<div class="pay-row'+(it.paid?' paid':'')+(od?' overdue':'')+'" data-pay-key="'+esc(it.key)+'" data-mk="'+it.mk+'">'+
       '<span class="chk'+(it.paid?' checked':'')+'"></span>'+
-      '<span class="nm"><span class="nm-t">'+esc(it.name)+(tag?'<i class="tag">'+tag+'</i>':'')+'</span>'+(sub?'<span class="sub">'+sub+'</span>':'')+'</span>'+amt+'</div>';
+      '<span class="nm"><span class="nm-t">'+esc(it.name)+(tag?'<i class="tag">'+tag+'</i>':'')+'</span>'+(sub?'<span class="sub">'+sub+'</span>':'')+'</span>'+amt+
+      (withMonth ? '' : (hasSub ? '<button type="button" class="cs-chev'+(opened?' open':'')+'" data-cstog="'+esc(it.key+'__'+it.mk)+'" aria-label="内訳"><i></i></button>' : '<span class="cs-chev-sp"></span>'))+'</div>'+
+      (opened ? cardSubHtml(it) : '');
+  }
+  // カードの請求の内訳：固定支出は1件ずつ（金額はタップでその月だけ変更）、利用分・積立はまとめて
+  var openCardSubs = {};   // 開いているカードの内訳（カード×月）
+  function cardSubHtml(it){
+    var b = it.bill, use = b.usePart - (b.savPart||0), rows = '';
+    (it.fx||[]).forEach(function(f){
+      rows += '<div class="cs-row" data-edit="fixed" data-id="'+esc(f.id)+'" data-mk="'+it.mk+'"><span class="cs-n">'+esc(f.name)+'</span>'+(f.overridden?'<i class="tag cs-tag">今月変更</i>':'')+'<span class="cs-sp"></span>'+
+        '<button type="button" class="cs-a am-edit num" data-edit="fixed" data-id="'+esc(f.id)+'" data-mk="'+it.mk+'">'+yen(f.amount)+'</button></div>';
+    });
+    if(b.savPart) rows += '<div class="cs-row"><span class="cs-n">積立（年払い）</span><span class="cs-sp"></span><span class="cs-a ro num">'+yen(b.savPart)+'</span></div>';
+    if(use || rows) rows += '<div class="cs-row"><span class="cs-n">カードの利用分（記録）</span><span class="cs-sp"></span><span class="cs-a ro num">'+yen(use)+'</span></div>';
+    return rows ? '<div class="card-sub'+(it.paid?' paid':'')+'">'+rows+'</div>' : '';
   }
   function incRowHtml(inc){
     return '<div class="pay-row income" data-edit="'+(inc.extra?'extra':'inc')+'" data-id="'+esc(inc.id)+'" data-mk="'+inc.mk+'">'+
@@ -3161,6 +3211,8 @@
   document.getElementById('view2').addEventListener('click', function(e){
     if(e.target.closest('#extraAddBtn')){ openEditSheet('extra', null, monthKey(monthOffsetDate(payOffset))); return; }
     if(e.target.closest('#extraOutAddBtn')){ openEditSheet('xout', null, monthKey(monthOffsetDate(payOffset))); return; }
+    var tg = e.target.closest('[data-cstog]');
+    if(tg){ var k = tg.getAttribute('data-cstog'); openCardSubs[k] = !openCardSubs[k]; var rs = payAnchor(tg.closest('.pay-row')); refreshPay().then(rs); return; }
     var row = e.target.closest('.pay-row');
     if(row && row.hasAttribute('data-pay-key') && e.target.closest('.chk')){
       var restore = payAnchor(row);
