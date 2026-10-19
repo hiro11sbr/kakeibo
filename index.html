@@ -1559,6 +1559,8 @@
   .cs-chev{ transition:background-color .26s ease, color .26s ease !important; }
   .cs-chev.open{ background:var(--expense) !important; color:#fff !important; }
 
+  .es-src .ap.card{ background:#6E56CF; }
+
   /* タブバー：すりガラス */
   nav.tabbar{ background:color-mix(in srgb, var(--card) 78%, transparent); border-top:1px solid var(--hair);
     backdrop-filter:saturate(1.6) blur(20px); -webkit-backdrop-filter:saturate(1.6) blur(20px); }
@@ -2458,8 +2460,17 @@
       }
     });
     usePart += savPart;
+    // 臨時の請求で支払い元がこのカードのもの：その日（日付なしは1日）の利用として、締め日・支払月に従って請求に含める
+    var xoList = [];
+    Object.keys(monthlyById).forEach(function(k){
+      var x = monthlyById[k]; if(x.kind!=='xout' || x.account!=='card:'+card.id) return;
+      var u = mkYM(x.mk), dd = Math.min(x.day||1, new Date(u.y, u.m+1, 0).getDate());
+      if(billMonthOf({date:new Date(u.y, u.m, dd)}, card)===mk) xoList.push(x);
+    });
+    var xoPart = xoList.reduce(function(a,x){ return a + x.amount; }, 0);
+    usePart += xoPart;
     var ov = getOverride(card.id, mk);
-    return {fixedPart:fixedPart, usePart:usePart, savPart:savPart, est:fixedPart+usePart, amount:(ov!=null?ov:fixedPart+usePart), confirmed:ov!=null, prevMonth:prev.getMonth()+1};
+    return {fixedPart:fixedPart, usePart:usePart, savPart:savPart, xoPart:xoPart, xoList:xoList, est:fixedPart+usePart, amount:(ov!=null?ov:fixedPart+usePart), confirmed:ov!=null, prevMonth:prev.getMonth()+1};
   }
   function migrateCards(){
     if(meta.cardsMigrated) return Promise.resolve();
@@ -2959,6 +2970,7 @@
     // 臨時の請求（この月だけ）
     Object.keys(monthlyById).forEach(function(k){
       var x = monthlyById[k]; if(x.kind!=='xout' || x.mk!==mk) return;
+      if(String(x.account||'').indexOf('card:')===0) return;   // カード払いの臨時の請求は、そのカードの請求に含める
       var self = x.account===XSELF, due = x.day ? dueDateOf(y,m,x.day) : monthEnd, key = 'xo-'+x.id;
       items.push({key:key, xid:x.id, mk:mk, name:x.name, amount:x.amount, due:due, actual:due, monthOnly:!x.day, kind:'xout',
         mode:self?'self':'debit', account:self?'':(x.account||''), paid:!!ctx.paidSet[key+'__'+mk]});
@@ -3086,7 +3098,7 @@
   // カードの請求の内訳：固定支出は1件ずつ（金額はタップでその月だけ変更）、利用分・積立はまとめて
   var openCardSubs = {};   // 開いているカードの内訳（カード×月）
   function cardSubHtml(it){
-    var b = it.bill, use = b.usePart - (b.savPart||0), rows = '', sum = 0;
+    var b = it.bill, use = b.usePart - (b.savPart||0) - (b.xoPart||0), rows = '', sum = 0;
     var ps = (payCtx && payCtx.paidSet) || {};
     var row = function(key, name, amtHtml, tag, editAttr){
       var k = 'cs-'+it.key+'-'+key, paid = !!ps[k+'__'+it.mk];
@@ -3096,6 +3108,10 @@
     (it.fx||[]).forEach(function(f){
       sum += f.amount;
       rows += row(f.id, f.name, '<button type="button" class="am am-edit num" data-edit="fixed" data-id="'+esc(f.id)+'" data-mk="'+it.mk+'">'+yen(f.amount)+'</button>', f.overridden?'今月変更':'', '');
+    });
+    (b.xoList||[]).forEach(function(x){
+      sum += x.amount;
+      rows += row('xo'+x.id, x.name, '<button type="button" class="am am-edit num" data-edit="xout" data-id="'+esc(x.id)+'" data-mk="'+x.mk+'">'+yen(x.amount)+'</button>', '臨時', '');
     });
     if(b.savPart){ sum += b.savPart; rows += row('sav', '積立（年払い）', '<span class="am num">'+yen(b.savPart)+'</span>'); }
     sum += use;
@@ -3308,6 +3324,7 @@
       reset = xo ? 'この請求を削除' : '';
       var names = acctList(), cur = xo ? (xo.account||'') : (names.length===1 ? names[0] : '');
       srcHtml = '<div class="es-src-h">支払い元</div><div class="ap-list">'+names.map(function(n){ return '<button type="button" class="acct-tag ap'+(n===cur?' on':'')+'" data-xsrc="'+esc(n)+'" style="background:'+acctColor(n)+'">'+esc(n)+'</button>'; }).join('')+
+        cardsCache.filter(function(x){ return (x.type||'credit')==='credit'; }).map(function(x){ var v = 'card:'+x.id; return '<button type="button" class="acct-tag ap card'+(cur===v?' on':'')+'" data-xsrc="'+v+'">'+esc(x.name)+'</button>'; }).join('')+
         '<button type="button" class="acct-tag ap self'+(cur===XSELF?' on':'')+'" data-xsrc="'+XSELF+'">自分で支払う</button></div>';
       xsrcSel = cur;
     } else {
