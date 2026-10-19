@@ -1561,6 +1561,16 @@
 
   .es-src .ap.card{ background:#6E56CF; }
 
+  /* v89：日付の欄に薄く「日」 */
+  /* v90：「日」は数字のすぐ右に（数字は最大2桁）。未入力のときはグレー字だけを出す */
+  .es-day-wrap{ display:flex; align-items:baseline; gap:10px; margin-top:14px; border-bottom:2px solid var(--accent-a); }
+
+  .es-day-wrap[hidden]{ display:none; }
+  .es-day-wrap #esDay{ flex:1; min-width:0; border:none !important; box-shadow:none !important; margin:0 !important; }
+  .es-day-wrap.has #esDay{ flex:none; width:2.3ch; }
+  .es-day-unit{ display:none; font-size:16px; color:var(--ink-soft); }
+  .es-day-wrap.has .es-day-unit{ display:inline; }
+
   /* タブバー：すりガラス */
   nav.tabbar{ background:color-mix(in srgb, var(--card) 78%, transparent); border-top:1px solid var(--hair);
     backdrop-filter:saturate(1.6) blur(20px); -webkit-backdrop-filter:saturate(1.6) blur(20px); }
@@ -1822,7 +1832,7 @@
       <div class="amount-row"><span class="yen">¥</span><input id="esAmount" class="amount-input num" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0"></div>
     </div>
     <div id="esBreak"></div>
-    <input type="number" inputmode="numeric" id="esDay" class="memo-input" placeholder="入金日（数字のみ・任意）" style="margin-top:14px;">
+    <div class="es-day-wrap" id="esDayWrap"><input type="number" inputmode="numeric" id="esDay" class="memo-input" placeholder="入金日（数字のみ・任意）"><span class="es-day-unit">日</span></div>
     <div id="esSrc" class="es-src" hidden></div>
     <button class="primary-btn" id="esSave">保存</button>
     <button class="modal-cancel" id="esReset" style="color:var(--accent-a);font-weight:600;"></button>
@@ -2460,12 +2470,12 @@
       }
     });
     usePart += savPart;
-    // 臨時の請求で支払い元がこのカードのもの：その日（日付なしは1日）の利用として、締め日・支払月に従って請求に含める
+    // 臨時の請求で支払い元がこのカードのもの：その月の請求を確定させるための追加なので、追加した月の請求にそのまま含める
+    // （支払日はカードの支払日。日付の入力は使わない）
     var xoList = [];
     Object.keys(monthlyById).forEach(function(k){
       var x = monthlyById[k]; if(x.kind!=='xout' || x.account!=='card:'+card.id) return;
-      var u = mkYM(x.mk), dd = Math.min(x.day||1, new Date(u.y, u.m+1, 0).getDate());
-      if(billMonthOf({date:new Date(u.y, u.m, dd)}, card)===mk) xoList.push(x);
+      if(x.mk===mk) xoList.push(x);
     });
     var xoPart = xoList.reduce(function(a,x){ return a + x.amount; }, 0);
     usePart += xoPart;
@@ -3339,8 +3349,10 @@
     document.getElementById('esNote').hidden = !note;
     var nm = document.getElementById('esName'); nm.hidden = !showName; nm.value = name;
     var dy = document.getElementById('esDay'); dy.hidden = !showDay; dy.value = day;
-    dy.placeholder = type==='xout' ? '引落日・支払日（数字のみ・任意）' : '入金日（数字のみ・任意）';
+    document.getElementById('esDayWrap').hidden = !showDay; setTimeout(syncDayUnit, 0);
+    dy.placeholder = type==='xout' ? '引き落とし日を入力' : '入金日（数字のみ・任意）';
     var es = document.getElementById('esSrc'); es.hidden = !srcHtml; es.innerHTML = srcHtml;
+    if(type==='xout') setTimeout(syncXoutDay, 0);
     document.getElementById('esAmount').value = amount;
     document.getElementById('esBreak').innerHTML = breakHtml;
     var rs = document.getElementById('esReset'); rs.hidden = !reset; rs.textContent = reset;
@@ -3351,9 +3363,19 @@
     try{ focusEl.focus(); if(focusEl===amtEl) amtEl.setSelectionRange(0, amtEl.value.length); }catch(err){}
   }
   var xsrcSel = '';
+  // 日付の欄：入力があるときだけ、数字の幅に縮めて「日」を横に付ける
+  function syncDayUnit(){ var d = document.getElementById('esDay'); document.getElementById('esDayWrap').classList.toggle('has', String(d.value).length > 0); }
+  document.getElementById('esDay').addEventListener('input', syncDayUnit);
+  // カード払いの臨時の請求は、支払日がカードで決まるので日付の欄を隠す
+  function syncXoutDay(){
+    if(!sheet || sheet.type!=='xout') return;
+    var isCard = String(xsrcSel||'').indexOf('card:')===0, dy = document.getElementById('esDay');
+    dy.hidden = isCard; document.getElementById('esDayWrap').hidden = isCard; if(isCard) dy.value = ''; syncDayUnit();
+  }
   document.getElementById('esSrc').addEventListener('click', function(e){
     var b = e.target.closest('[data-xsrc]'); if(!b) return; xsrcSel = b.getAttribute('data-xsrc');
     this.querySelectorAll('[data-xsrc]').forEach(function(x){ x.classList.toggle('on', x===b); });
+    syncXoutDay();
   });
   function closeSheet(){ document.getElementById('editSheet').hidden = true; sheet = null; }
   document.getElementById('esCancel').addEventListener('click', closeSheet);
