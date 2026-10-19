@@ -1571,6 +1571,13 @@
   .es-day-unit{ display:none; font-size:16px; color:var(--ink-soft); }
   .es-day-wrap.has .es-day-unit{ display:inline; }
 
+  /* v91：支払いタブの金額は、ホームと同じ四則演算つきのテンキーで入力 */
+  .es-kp{ display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin:14px 0 4px; }
+  .es-kp button{ height:46px; border:none; border-radius:12px; background:#eef1f6; color:#1a2233; font-size:20px; font-weight:600; -webkit-tap-highlight-color:transparent; }
+  .es-kp button:active{ filter:brightness(.92); }
+  .es-kp button[data-k="/"], .es-kp button[data-k="*"], .es-kp button[data-k="-"], .es-kp button[data-k="+"]{ background:#e3ebff; color:#0046F5; }
+  .es-expr{ min-height:16px; font-size:13px; color:var(--ink-soft); text-align:right; margin-top:4px; }
+
   /* タブバー：すりガラス */
   nav.tabbar{ background:color-mix(in srgb, var(--card) 78%, transparent); border-top:1px solid var(--hair);
     backdrop-filter:saturate(1.6) blur(20px); -webkit-backdrop-filter:saturate(1.6) blur(20px); }
@@ -1829,11 +1836,13 @@
     <input type="text" id="esName" class="memo-input" placeholder="項目名" style="margin-bottom:14px;">
     <div class="amount-card filled">
       <label class="amount-label-inner" for="esAmount">金額</label>
-      <div class="amount-row"><span class="yen">¥</span><input id="esAmount" class="amount-input num" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="0"></div>
+      <div class="amount-row"><span class="yen">¥</span><input id="esAmount" class="amount-input num" type="text" inputmode="none" readonly autocomplete="off" placeholder="0"></div>
     </div>
+    <div class="es-expr num" id="esExpr"></div>
     <div id="esBreak"></div>
     <div class="es-day-wrap" id="esDayWrap"><input type="number" inputmode="numeric" id="esDay" class="memo-input" placeholder="入金日（数字のみ・任意）"><span class="es-day-unit">日</span></div>
     <div id="esSrc" class="es-src" hidden></div>
+    <div class="es-kp" id="esKp"><button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button><button type="button" data-k="/">÷</button><button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button><button type="button" data-k="*">×</button><button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button><button type="button" data-k="-">−</button><button type="button" data-k="00">00</button><button type="button" data-k="0">0</button><button type="button" data-k="bs">⌫</button><button type="button" data-k="+">+</button></div>
     <button class="primary-btn" id="esSave">保存</button>
     <button class="modal-cancel" id="esReset" style="color:var(--accent-a);font-weight:600;"></button>
     <button class="modal-cancel" id="esCancel">キャンセル</button>
@@ -3304,6 +3313,7 @@
   // 金額編集シート
   var sheet = null, sheetOrigAmount = null;
   function openEditSheet(type, id, mk){
+    if(typeof resetEsKeypad==='function') resetEsKeypad();
     var ym = mkYM(mk), mlabel = (ym.m+1)+'月';
     var title='', note='', amount='', showName=false, showDay=false, reset='', name='', day='', breakHtml='', srcHtml='';
     if(type==='card'){
@@ -3363,6 +3373,21 @@
     try{ focusEl.focus(); if(focusEl===amtEl) amtEl.setSelectionRange(0, amtEl.value.length); }catch(err){}
   }
   var xsrcSel = '';
+  // 金額のテンキー：開いた直後に数字を打つと打ち直し、＋−×÷から打つと今の金額に続けて計算
+  var esExprStr = '', esFresh = true;
+  function resetEsKeypad(){ esExprStr = ''; esFresh = true; document.getElementById('esExpr').textContent = ''; }
+  document.getElementById('esKp').addEventListener('click', function(e){
+    var b = e.target.closest('[data-k]'); if(!b) return; var k = b.getAttribute('data-k');
+    var a = document.getElementById('esAmount'), isOpK = /^[+\-*\/]$/.test(k);
+    if(esFresh){ esExprStr = (isOpK || k==='bs') ? String(a.value||'').replace(/[^0-9]/g,'') : ''; esFresh = false; }
+    if(k==='bs') esExprStr = esExprStr.slice(0,-1);
+    else if(isOpK && /[+\-*\/]$/.test(esExprStr)) esExprStr = esExprStr.slice(0,-1) + k;   // 演算子の連打は置き換え
+    else esExprStr += k;
+    var v = esExprStr ? evalExpr(esExprStr) : 0;
+    a.value = (v==null || isNaN(v)) ? '' : String(Math.max(0, Math.round(v)));
+    document.getElementById('esExpr').textContent = /[+\-*\/]/.test(esExprStr) ? esExprStr.replace(/\*/g,'×').replace(/\//g,'÷').replace(/-/g,'−') : '';
+    a.dispatchEvent(new Event('input', {bubbles:true}));
+  });
   // 日付の欄：入力があるときだけ、数字の幅に縮めて「日」を横に付ける
   function syncDayUnit(){ var d = document.getElementById('esDay'); document.getElementById('esDayWrap').classList.toggle('has', String(d.value).length > 0); }
   document.getElementById('esDay').addEventListener('input', syncDayUnit);
