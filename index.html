@@ -1533,6 +1533,32 @@
   .card-sub .cs-row{ min-height:27px !important; }
   .card-sub{ margin-right:27px !important; }
 
+  /* v85：内訳は通常の行と同じ見た目（チェックあり）。開いている間は、カードの行と内訳を淡い帯でひとまとめに */
+  .cs-group{ margin:2px -8px; padding:0 8px 2px; border-radius:12px; background:rgba(0,70,245,.06); box-shadow:inset 3px 0 0 #0046F5; }
+  .cs-group .pay-row.cs-open .nm-t{ font-weight:700; }
+  .card-sub2 .pay-row{ border-top:1px dashed rgba(20,40,80,.12); }
+  /* 開閉ボタンを見つけやすく：青い矢印＋淡い青の下地 */
+  .cs-chev{ width:26px !important; height:26px !important; margin:0 -4px 0 4px !important; border-radius:8px !important; background:rgba(0,70,245,.10) !important; color:#0046F5 !important; }
+  .cs-chev i{ border-width:0 2.2px 2.2px 0 !important; }
+  .cs-chev.open{ background:#0046F5 !important; color:#fff !important; }
+  .cs-chev-sp{ width:26px !important; }
+
+  /* v86：内訳は灰色の受け皿（案C）。開いている合計の行は、ボタンを請求の色で塗り、カード名を太字に（案1）。開閉はなめらかに */
+  .cs-group{ all:unset; }
+  .cs-tray{ margin:0 0 6px 14px; border-radius:10px; background:#f3f4f7; overflow:hidden; transition:height .26s ease, margin .26s ease; }
+  .cs-tray:not(.open){ margin-bottom:0; }
+  .cs-tray .card-sub2{ padding:0 0 0 8px; }
+  .cs-tray .card-sub2 .pay-row{ border-top:1px solid rgba(20,40,80,.07) !important; }
+  .cs-tray .card-sub2 .pay-row:first-child{ border-top:none !important; }
+  .cs-tray .cs-chev-sp{ width:26px !important; }
+  .pay-row.cs-open .nm-t{ font-weight:700; }
+  .cs-tray .nm-t{ word-break:keep-all; white-space:normal !important; overflow:visible !important; text-overflow:clip !important; line-height:1.3; }
+  .cs-tray .pay-row{ padding-top:6px; padding-bottom:6px; }
+  .cs-chev{ background:rgba(201,120,42,.14) !important; color:var(--expense) !important; }
+  .cs-chev i{ transition:transform .26s ease !important; }
+  .cs-chev{ transition:background-color .26s ease, color .26s ease !important; }
+  .cs-chev.open{ background:var(--expense) !important; color:#fff !important; }
+
   /* タブバー：すりガラス */
   nav.tabbar{ background:color-mix(in srgb, var(--card) 78%, transparent); border-top:1px solid var(--hair);
     backdrop-filter:saturate(1.6) blur(20px); -webkit-backdrop-filter:saturate(1.6) blur(20px); }
@@ -3050,23 +3076,33 @@
     var amt = editType
       ? '<button type="button" class="am am-edit num" data-edit="'+editType+'" data-id="'+esc(it.kind==='xout' ? it.xid : it.key)+'" data-mk="'+it.mk+'">'+yen(it.amount)+'</button>'
       : '<span class="am num">'+yen(it.amount)+'</span>';
-    return '<div class="pay-row'+(it.paid?' paid':'')+(od?' overdue':'')+'" data-pay-key="'+esc(it.key)+'" data-mk="'+it.mk+'">'+
+    var html = '<div class="pay-row'+(it.paid?' paid':'')+(od?' overdue':'')+(opened?' cs-open':'')+'" data-pay-key="'+esc(it.key)+'" data-mk="'+it.mk+'">'+
       '<span class="chk'+(it.paid?' checked':'')+'"></span>'+
       '<span class="nm"><span class="nm-t">'+esc(it.name)+(tag?'<i class="tag">'+tag+'</i>':'')+'</span>'+(sub?'<span class="sub">'+sub+'</span>':'')+'</span>'+amt+
-      (withMonth ? '' : (hasSub ? '<button type="button" class="cs-chev'+(opened?' open':'')+'" data-cstog="'+esc(it.key+'__'+it.mk)+'" aria-label="内訳"><i></i></button>' : '<span class="cs-chev-sp"></span>'))+'</div>'+
-      (opened ? cardSubHtml(it) : '');
+      (withMonth ? '' : (hasSub ? '<button type="button" class="cs-chev'+(opened?' open':'')+'" data-cstog="'+esc(it.key+'__'+it.mk)+'" aria-label="内訳"><i></i></button>' : '<span class="cs-chev-sp"></span>'))+'</div>';
+    // 内訳は常に用意しておき、開閉はアニメーションで切り替える（受け皿に入れる）
+    return hasSub ? html+'<div class="cs-tray'+(opened?' open':'')+'" data-tray="'+esc(it.key+'__'+it.mk)+'"'+(opened?'':' style="height:0"')+'>'+cardSubHtml(it)+'</div>' : html;
   }
   // カードの請求の内訳：固定支出は1件ずつ（金額はタップでその月だけ変更）、利用分・積立はまとめて
   var openCardSubs = {};   // 開いているカードの内訳（カード×月）
   function cardSubHtml(it){
-    var b = it.bill, use = b.usePart - (b.savPart||0), rows = '';
+    var b = it.bill, use = b.usePart - (b.savPart||0), rows = '', sum = 0;
+    var ps = (payCtx && payCtx.paidSet) || {};
+    var row = function(key, name, amtHtml, tag, editAttr){
+      var k = 'cs-'+it.key+'-'+key, paid = !!ps[k+'__'+it.mk];
+      return '<div class="pay-row cs-item'+(paid?' paid':'')+'" data-pay-key="'+esc(k)+'" data-mk="'+it.mk+'"'+(editAttr||'')+'>'+
+        '<span class="chk'+(paid?' checked':'')+'"></span><span class="nm"><span class="nm-t">'+esc(name)+(tag?'<i class="tag">'+tag+'</i>':'')+'</span></span>'+amtHtml+'<span class="cs-chev-sp"></span></div>';
+    };
     (it.fx||[]).forEach(function(f){
-      rows += '<div class="cs-row" data-edit="fixed" data-id="'+esc(f.id)+'" data-mk="'+it.mk+'"><span class="cs-n">'+esc(f.name)+'</span>'+(f.overridden?'<i class="tag cs-tag">今月変更</i>':'')+'<span class="cs-sp"></span>'+
-        '<button type="button" class="cs-a am-edit num" data-edit="fixed" data-id="'+esc(f.id)+'" data-mk="'+it.mk+'">'+yen(f.amount)+'</button></div>';
+      sum += f.amount;
+      rows += row(f.id, f.name, '<button type="button" class="am am-edit num" data-edit="fixed" data-id="'+esc(f.id)+'" data-mk="'+it.mk+'">'+yen(f.amount)+'</button>', f.overridden?'今月変更':'', '');
     });
-    if(b.savPart) rows += '<div class="cs-row"><span class="cs-n">積立（年払い）</span><span class="cs-sp"></span><span class="cs-a ro num">'+yen(b.savPart)+'</span></div>';
-    if(use || rows) rows += '<div class="cs-row"><span class="cs-n">カードの利用分（記録）</span><span class="cs-sp"></span><span class="cs-a ro num">'+yen(use)+'</span></div>';
-    return rows ? '<div class="card-sub'+(it.paid?' paid':'')+'">'+rows+'</div>' : '';
+    if(b.savPart){ sum += b.savPart; rows += row('sav', '積立（年払い）', '<span class="am num">'+yen(b.savPart)+'</span>'); }
+    sum += use;
+    rows += row('use', 'カードの利用分\u200B（記録）', '<span class="am num">'+yen(use)+'</span>');
+    // 確定額を入れたときは、内訳の合計との差を「雑費」として出す（内訳の合計＝確定額になる）
+    if(b.confirmed && b.amount !== sum) rows += row('misc', '雑費', '<span class="am num">'+yen(b.amount - sum)+'</span>');
+    return '<div class="card-sub2">'+rows+'</div>';
   }
   function incRowHtml(inc){
     return '<div class="pay-row income" data-edit="'+(inc.extra?'extra':'inc')+'" data-id="'+esc(inc.id)+'" data-mk="'+inc.mk+'">'+
@@ -3212,7 +3248,19 @@
     if(e.target.closest('#extraAddBtn')){ openEditSheet('extra', null, monthKey(monthOffsetDate(payOffset))); return; }
     if(e.target.closest('#extraOutAddBtn')){ openEditSheet('xout', null, monthKey(monthOffsetDate(payOffset))); return; }
     var tg = e.target.closest('[data-cstog]');
-    if(tg){ var k = tg.getAttribute('data-cstog'); openCardSubs[k] = !openCardSubs[k]; var rs = payAnchor(tg.closest('.pay-row')); refreshPay().then(rs); return; }
+    if(tg){
+      var k = tg.getAttribute('data-cstog'), open = !openCardSubs[k]; openCardSubs[k] = open;
+      var head = tg.closest('.pay-row'), tray = document.querySelector('#payList [data-tray="'+k.replace(/"/g,'\"')+'"]');
+      tg.classList.toggle('open', open); head.classList.toggle('cs-open', open);
+      if(tray){
+        var full = tray.firstElementChild.offsetHeight;
+        if(open){ tray.classList.add('open'); tray.style.height = '0px'; tray.offsetHeight; tray.style.height = full+'px';
+          setTimeout(function(){ if(openCardSubs[k]) tray.style.height = ''; }, 280); }
+        else { tray.style.height = full+'px'; tray.offsetHeight; tray.style.height = '0px';
+          setTimeout(function(){ if(!openCardSubs[k]) tray.classList.remove('open'); }, 280); }
+      }
+      return;
+    }
     var row = e.target.closest('.pay-row');
     if(row && row.hasAttribute('data-pay-key') && e.target.closest('.chk')){
       var restore = payAnchor(row);
