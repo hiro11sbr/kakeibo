@@ -1218,6 +1218,13 @@
   .subfoot{ background:color-mix(in srgb, var(--c) 9%, var(--card)) !important; border-top:none !important; border-bottom:1px solid var(--hair); padding:9px 14px !important; font-size:11.5px !important; }
   .subfoot span:last-child{ color:var(--c); font-weight:800; }
 
+  /* 支払元の見出しを大きく目立たせ、小計は小さく控えめに（見出しと間違えない） */
+  .subhead{ padding:12px 14px !important; margin-top:14px; font-size:16px !important; gap:8px; color:var(--c) !important; background:color-mix(in srgb, var(--c) 16%, var(--card)) !important; border-top:1px solid color-mix(in srgb, var(--c) 35%, transparent) !important; }
+  .subhead::before{ height:18px; }
+  .subfoot{ background:none !important; border-top:1px solid var(--hair) !important; padding:7px 14px 8px !important; font-size:11px !important; }
+  .subfoot span:first-child{ color:var(--ink-faint); font-weight:500; }
+  .subfoot span:last-child{ color:var(--ink-soft); font-weight:600; }
+
   /* v38：設定の追加ボタンはカードの外に（点線の枠で「足す」ことを表す） */
   .sec-add{ display:block; width:100%; margin-top:10px; padding:12px; border:1.5px dashed color-mix(in srgb, var(--c) 55%, transparent); border-radius:14px;
     background:color-mix(in srgb, var(--c) 6%, transparent); color:var(--c); font-size:14px; font-weight:700; -webkit-tap-highlight-color:transparent; }
@@ -1689,7 +1696,7 @@
         </div>
       </div>
       <div class="body">
-        <div class="seg" id="repMode"><button type="button" class="on" data-rm="month">月</button><button type="button" data-rm="year">年</button></div>
+        <div class="seg" id="repMode"><button type="button" data-rm="year">年</button><button type="button" class="on" data-rm="month">月</button></div>
         <div class="grp" id="repYearGrp" hidden><div class="grp-head"><span>年間の収支</span></div><div class="card rep-year" id="repYear"></div></div>
         <div class="grp" id="repUtilGrp" hidden><div class="grp-head"><span>年間の光熱費</span></div><div class="card rep-year" id="repUtil"></div></div>
         <div class="grp"><div class="grp-head"><span id="repCatHead">カテゴリ別の変動費</span></div>
@@ -3568,7 +3575,7 @@
     income: {store:'income', title:'固定収入', label:'固定収入を', fields:[['name','名前','text'],['amount','金額','amt'],['day','入金日','dateset']]},
     fixed:  {store:'fixedCosts', title:'固定支出', label:'固定支出を', fields:[['name','名前','text'],['mode','金額の決め方','mode'],['amount','金額','amt'],['monthly','月ごとの金額','months'],['payId','支払元','pay'],['account','引落口座','acctSel'],['dueDay','引落日','dateset'],['utility','光熱費として年間レポートに数える','check']]},
     method: {store:'cards', title:'支払い方法', label:'支払い方法を', fields:[['name','名前','text'],['type','種類','mtype'],['billing','請求の払い方','billing'],['closeDay','締め日','closeday'],['payMonth','支払月','paymonth'],['chargeFrom','チャージ元','charge'],['account','引落口座','acctSel'],['dueDay','支払日','dateset'],['isDefault','記録するときの既定の支払元にする','check']]},
-    savings:{store:'savingsItems', title:'積立', label:'積立項目を', fields:[['name','名前','text'],['amount','金額（1回分）','amt'],['periodYears','何年ごと','num'],['dueYM','次回の支払い','nextYM'],['account','支払い元','acctSel']]}
+    savings:{store:'savingsItems', title:'積立', label:'積立項目を', fields:[['name','名前','text'],['amount','金額（1回分）','amt'],['periodYears','何年ごと','num'],['dueYM','次回の支払い','nextYM'],['account','支払い元','acctSel'],['utility','光熱費として年間レポートに数える','check']]}
   };
   var itemCtx = null;
   function openItemSheet(kind, id, prefill){
@@ -3750,7 +3757,7 @@
       else rec[k] = v;
     });
     var uc = f.querySelector('[data-f="utility"]');
-    if(c.kind==='fixed' && uc) rec.utility = uc.checked;   // チェックの有無を保存（未設定の項目だけ名前で判定）
+    if((c.kind==='fixed' || c.kind==='savings') && uc) rec.utility = uc.checked;   // チェックの有無を保存（未設定の項目だけ名前で判定）
     closeItemSheet();
     var p = put(def.store, rec);
     var dc = f.querySelector('[data-f="isDefault"]');
@@ -3997,8 +4004,8 @@
     });
   }
   function refreshReport(){
-    return Promise.all([getAll('transactions'), getAll('income'), getAll('fixedCosts')]).then(function(res){
-      var all=res[0], income=res[1], fixed=res[2];
+    return Promise.all([getAll('transactions'), getAll('income'), getAll('fixedCosts'), getAll('savingsItems')]).then(function(res){
+      var all=res[0], income=res[1], fixed=res[2], savItems=res[3];
       var cur = mkYM(curPeriodKey());
       var isYear = reportMode==='year';
       document.getElementById('repYearGrp').hidden = !isYear;
@@ -4029,12 +4036,15 @@
       var utils = fixed.filter(function(f){ return !f.variable && !f.fromSavings && isUtility(f); }).map(function(f){
         var t = 0; for(var mm=1; mm<=12; mm++){ var k3 = y+'-'+mm; if(activeIn(f, k3)) t += fixedAmt(f, k3); }
         return {name:f.name, total:t};
-      }).sort(function(a,b){ return b.total-a.total; });
+      });
+      // 積立に入れている光熱費（灯油など）は、1年あたりの金額（1回分÷何年ごとか）で数える
+      savItems.filter(isUtility).forEach(function(sv){ utils.push({name:sv.name+'（積立）', total:Math.round(sv.amount/(sv.periodYears||1))}); });
+      utils.sort(function(a,b){ return b.total-a.total; });
       var utilT = utils.reduce(function(s,u){ return s+u.total; },0);
       document.getElementById('repUtil').innerHTML = utils.length ?
         utils.map(function(u){ return '<div class="ry-row"><span>'+esc(u.name)+'</span><b class="num">'+yen(u.total)+'</b></div>'; }).join('')+
-        '<div class="ry-row total"><span>合計</span><b class="num">'+yen(utilT)+'</b></div><div class="ry-note">月平均 '+yen(utilT/12)+'。設定の固定支出から計算（先の月の予定も含む）。</div>' :
-        '<div class="ry-note">電気代・ガス代・水道代を設定の固定支出に登録すると、ここに年間の合計が出る。</div>';
+        '<div class="ry-row total"><span>合計</span><b class="num">'+yen(utilT)+'</b></div><div class="ry-note">月平均 '+yen(utilT/12)+'。固定支出は設定の金額（先の月の予定も含む）、積立は1年あたりの金額で計算。</div>' :
+        '<div class="ry-note">電気代・ガス代・水道代を設定の固定支出、灯油代などを積立に登録すると、ここに年間の合計が出る。</div>';
       var bal = incT - fixT - spentT, done = rows.filter(function(r){ return r.sp>0; }).length;
       document.getElementById('repYear').innerHTML =
         '<div class="ry-row"><span>収入</span><b class="num">'+yen(incT)+'</b></div>'+
