@@ -3167,8 +3167,7 @@
         });
       }
       document.getElementById('payAlert').innerHTML = overdue.length ?
-        '<div class="grp"><div class="grp-head alert"><span>引き落とされていない支払い</span><span>'+overdue.length+'件</span></div><div class="card list alert-card">'+
-        overdue.map(function(it){ return payRowHtml(it,true); }).join('')+'</div></div>' : '';
+        '<div class="grp"><div class="grp-head alert"><span>支払い未チェックの項目があります</span><span>'+overdue.length+'件</span></div></div>' : '';
 
       // バンドのガラス：次の引落（当月）／その月の引落合計（他の月）
       var chip = '';
