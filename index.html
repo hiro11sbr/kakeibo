@@ -640,7 +640,7 @@
   #view2 .row-add{ --c:#173F78; }
   #view1 .card .f-amt,  #viewRep .card .f-amt{ color:var(--ink); }
   nav.tabbar[data-v="0"] button.active{ color:#173A9E; }
-  nav.tabbar[data-v="2"] button.active{ color:#173F78; }
+  nav.tabbar[data-v="1"] button.active{ color:#173F78; }
   nav.tabbar[data-v="3"] button.active{ color:#173A9E; }
   nav.tabbar[data-v="4"] button.active{ color:var(--ink); }
   @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) nav.tabbar[data-v="3"] button.active, :root:not([data-theme="light"]) nav.tabbar[data-v="2"] button.active, :root:not([data-theme="light"]) nav.tabbar[data-v="1"] button.active{ color:#8FB4FF; } }
@@ -1628,6 +1628,25 @@
     </div>
   </div>
 
+  <div class="view tabview" id="view2">
+    <div class="app-inner">
+      <div class="band">
+        <span class="band-mark" data-icon="calrepeat"></span>
+        <header class="top-space"></header>
+        <div class="band-nav">
+          <button class="gbtn" id="payPrev">‹</button>
+          <div class="band-title"><div class="t" id="payTitle">今月</div></div>
+          <button class="gbtn" id="payNextBtn">›</button>
+        </div>
+        <div id="payChip2"></div>
+      </div>
+      <div class="body">
+        <div id="payAlert"></div>
+        <div id="payList"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="view" id="view0">
     <div class="app-inner">
       <div class="snap-section">
@@ -1662,25 +1681,6 @@
        </div>
       </div>
 
-    </div>
-  </div>
-
-  <div class="view tabview" id="view2">
-    <div class="app-inner">
-      <div class="band">
-        <span class="band-mark" data-icon="calrepeat"></span>
-        <header class="top-space"></header>
-        <div class="band-nav">
-          <button class="gbtn" id="payPrev">‹</button>
-          <div class="band-title"><div class="t" id="payTitle">今月</div></div>
-          <button class="gbtn" id="payNextBtn">›</button>
-        </div>
-        <div id="payChip2"></div>
-      </div>
-      <div class="body">
-        <div id="payAlert"></div>
-        <div id="payList"></div>
-      </div>
     </div>
   </div>
 
@@ -2078,8 +2078,8 @@
 
 
   var TABS = [
-    {icon:'receipt', label:'履歴'}, {icon:'home', label:'ホーム'},
-    {icon:'calrepeat', label:'支払い'}, {icon:'chartline', label:'レポート'}, {icon:'gear', label:'設定'}
+    {icon:'receipt', label:'履歴'}, {icon:'calrepeat', label:'支払い'},
+    {icon:'home', label:'ホーム'}, {icon:'chartline', label:'レポート'}, {icon:'gear', label:'設定'}
   ];
   (function buildTabbar(){
     var bar = document.getElementById('tabbar');
@@ -2640,7 +2640,7 @@
     document.getElementById('catEditBar').hidden = !on;
   }
   document.getElementById('catEditDone').addEventListener('click', function(){ setCatEditing(false); });
-  document.getElementById('homeNotice').addEventListener('click', function(){ goTo(2); });
+  document.getElementById('homeNotice').addEventListener('click', function(){ goTo(1); });
   // グリッドを長押し→ドラッグで並べ替え（ホームとカテゴリ一覧で共通）
   function gridSortable(grid, itemSel, idAttr, o){
     var lpTimer = null, start = null, drag = null;
@@ -4214,7 +4214,7 @@
 
   // ---- タブ ----
   var VIEW_COUNT = 5;
-  var currentView = 1;   // 起動時はホーム（左に履歴、右にレポート・支払い・設定）
+  var currentView = 2;   // 起動時はホーム（真ん中。左に履歴・支払い、右にレポート・設定）
   var shell = document.getElementById('shell');
   function updateActiveTab(){
     document.querySelectorAll('.tabbar button').forEach(function(b){
