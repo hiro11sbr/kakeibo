@@ -1606,6 +1606,14 @@
   .rep-months .rm-amt{ width:86px; text-align:right; font-weight:700; }
   .rep-months .rm-row.zero .rm-amt{ color:var(--ink-faint); font-weight:500; }
   #repMode{ margin:0 0 14px; }
+  .rep-year .ry-tog{ width:100%; background:none; border:none; border-bottom:1px solid var(--hair); font-family:inherit; text-align:left; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .rep-year .ry-tog .ry-arr::before{ content:"▸"; display:inline-block; width:16px; color:var(--ink-faint); transition:transform .15s; }
+  .rep-year .ry-tog.open .ry-arr::before{ transform:rotate(90deg); }
+  .ry-months{ padding:2px 0 6px 16px; border-bottom:1px solid var(--hair); }
+  .ry-months .rm2{ display:flex; justify-content:space-between; padding:4px 0; font-size:13px; color:var(--ink); }
+  .ry-months .rm2 span:first-child{ color:var(--ink-soft); }
+  .ry-months .rm2.zero{ color:var(--ink-faint); }
+  .ry-months[hidden]{ display:none; }
 </style>
 </head>
 <body>
@@ -1696,8 +1704,7 @@
         </div>
       </div>
       <div class="body">
-        <div class="seg" id="repMode"><button type="button" data-rm="year">年</button><button type="button" class="on" data-rm="month">月</button></div>
-        <div class="grp" id="repYearGrp" hidden><div class="grp-head"><span>年間の収支</span></div><div class="card rep-year" id="repYear"></div></div>
+        <div class="seg" id="repMode"><button type="button" class="on" data-rm="year">年</button><button type="button" data-rm="month">月</button></div>
         <div class="grp" id="repUtilGrp" hidden><div class="grp-head"><span>年間の光熱費</span></div><div class="card rep-year" id="repUtil"></div></div>
         <div class="grp"><div class="grp-head"><span id="repCatHead">カテゴリ別の変動費</span></div>
           <div class="card rec-report" id="recReport">
@@ -1706,6 +1713,7 @@
           </div>
         </div>
         <div class="grp" id="repMonthsGrp" hidden><div class="grp-head"><span>月ごとの変動費</span></div><div class="card rep-months" id="repMonths"></div></div>
+        <div class="grp" id="repYearGrp" hidden><div class="grp-head"><span>年間の収支</span></div><div class="card rep-year" id="repYear"></div></div>
       </div>
     </div>
   </div>
@@ -3001,7 +3009,7 @@
   }
 
   // ---- 支払い ----
-  var payOffset = 0, payShowDone = false;
+  var payOffset = 0, payShowDone = false, payNoAuto = false;   // payNoAuto：自分で今月に戻したときは自動で進めない
   function buildPaidSet(recs){ var s={}; recs.forEach(function(r){ s[r.fixedCostId+'__'+r.monthKey]=true; }); return s; }
   function savingsDueIn(s, y, m){
     if(!s.dueMonth || s.dueMonth!==m+1) return false;
@@ -3199,6 +3207,11 @@
       var income=res[0];
       var ctx = payCtx = {fixed:res[1], paidSet:buildPaidSet(res[2]), savings:res[3], txs:res[4], cards:cardsCache, income:income};
       var today = todayMidnight();
+      // 今月の請求の日付がすべて過ぎていて、すべてチェック済みなら、翌月を表示する
+      if(payOffset===0 && !payNoAuto){
+        var b0 = monthOffsetDate(0), real = paymentItemsFor(b0.getFullYear(), b0.getMonth(), ctx).filter(function(it){ return !isEmptyBill(it); });
+        if(real.length && real.every(function(it){ return it.paid && (it.monthOnly || it.actual < today); })) payOffset = 1;
+      }
       var base = monthOffsetDate(payOffset), y=base.getFullYear(), m=base.getMonth();
       document.getElementById('payTitle').textContent = y+'年'+(m+1)+'月';
       document.getElementById('payPrev').disabled = payOffset<=-24;
@@ -3354,8 +3367,8 @@
     return;
     togglePaid(row.getAttribute('data-pay-key'), row.getAttribute('data-mk')).then(renderAll).then(restore);
   });
-  document.getElementById('payPrev').addEventListener('click', function(){ if(payOffset>-24){ payOffset -= 1; refreshPay(); } });
-  document.getElementById('payNextBtn').addEventListener('click', function(){ if(payOffset<11){ payOffset += 1; refreshPay(); } });
+  document.getElementById('payPrev').addEventListener('click', function(){ if(payOffset>-24){ payOffset -= 1; if(payOffset===0) payNoAuto = true; refreshPay(); } });
+  document.getElementById('payNextBtn').addEventListener('click', function(){ if(payOffset<11){ payOffset += 1; if(payOffset===0) payNoAuto = true; refreshPay(); } });
 
   // 金額編集シート
   var sheet = null, sheetOrigAmount = null;
@@ -3973,7 +3986,7 @@
     segs += '<g stroke="var(--card)" stroke-width="1.8" stroke-linecap="butt">'+seps+'</g>';
     return '<svg viewBox="0 0 120 120" width="150" height="150" shape-rendering="geometricPrecision"><g transform="rotate(-90 60 60)">'+segs+'</g></svg>';
   }
-  var reportMode = 'month', reportYearOffset = 0;
+  var reportMode = 'year', reportYearOffset = 0, utilOpen = {};
   // 光熱費の判定：項目ごとのチェック（utility）を優先。未設定の項目だけ、名前に電気・ガス・水道・灯油・光熱が入るかで決める
   function isUtility(f){ return f.utility!=null ? !!f.utility : /電気|ガス|水道|灯油|光熱/.test(f.name||''); }
   // カテゴリ別の内訳（ドーナツ＋一覧）
@@ -4034,16 +4047,25 @@
       }
       // 光熱費：電気・ガス・水道などの名前の固定支出を、月ごとの金額（その月だけ変えた分も含む）で合計する
       var utils = fixed.filter(function(f){ return !f.variable && !f.fromSavings && isUtility(f); }).map(function(f){
-        var t = 0; for(var mm=1; mm<=12; mm++){ var k3 = y+'-'+mm; if(activeIn(f, k3)) t += fixedAmt(f, k3); }
-        return {name:f.name, total:t};
+        var ms = [], t = 0; for(var mm=1; mm<=12; mm++){ var k3 = y+'-'+mm, v = activeIn(f, k3) ? fixedAmt(f, k3) : 0; ms.push(v); t += v; }
+        return {name:f.name, total:t, months:ms};
       });
-      // 積立に入れている光熱費（灯油など）は、1年あたりの金額（1回分÷何年ごとか）で数える
-      savItems.filter(isUtility).forEach(function(sv){ utils.push({name:sv.name+'（積立）', total:Math.round(sv.amount/(sv.periodYears||1))}); });
+      // 積立に入れている光熱費（灯油など）は、合計は1年あたりの金額（1回分÷何年ごとか）、月別は支払い月に1回分を表示
+      savItems.filter(isUtility).forEach(function(sv){
+        var ms = []; for(var mm=0; mm<12; mm++) ms.push(savingsDueIn(sv, y, mm) ? sv.amount : 0);
+        utils.push({name:sv.name+'（積立）', total:Math.round(sv.amount/(sv.periodYears||1)), months:ms});
+      });
       utils.sort(function(a,b){ return b.total-a.total; });
       var utilT = utils.reduce(function(s,u){ return s+u.total; },0);
+      var utilM = []; for(var q=0; q<12; q++) utilM.push(utils.reduce(function(s,u){ return s+u.months[q]; },0));
+      function utilRow(key, name, total, months, cls){
+        var open = !!utilOpen[key];
+        return '<button type="button" class="ry-row ry-tog'+(cls?' '+cls:'')+(open?' open':'')+'" data-uk="'+esc(key)+'"><span><i class="ry-arr"></i>'+esc(name)+'</span><b class="num">'+yen(total)+'</b></button>'+
+          '<div class="ry-months"'+(open?'':' hidden')+'>'+months.map(function(v,i){ return '<div class="rm2'+(v>0?'':' zero')+'"><span>'+(i+1)+'月</span><span class="num">'+yen(v)+'</span></div>'; }).join('')+'</div>';
+      }
       document.getElementById('repUtil').innerHTML = utils.length ?
-        utils.map(function(u){ return '<div class="ry-row"><span>'+esc(u.name)+'</span><b class="num">'+yen(u.total)+'</b></div>'; }).join('')+
-        '<div class="ry-row total"><span>合計</span><b class="num">'+yen(utilT)+'</b></div><div class="ry-note">月平均 '+yen(utilT/12)+'。固定支出は設定の金額（先の月の予定も含む）、積立は1年あたりの金額で計算。</div>' :
+        utils.map(function(u, i){ return utilRow('i'+i+u.name, u.name, u.total, u.months); }).join('')+
+        utilRow('__total', '合計', utilT, utilM, 'total')+'<div class="ry-note">月平均 '+yen(utilT/12)+'。矢印で月別を表示。固定支出は設定の金額（先の月の予定も含む）、積立は合計が1年あたりの金額、月別は支払い月の1回分。</div>' :
         '<div class="ry-note">電気代・ガス代・水道代を設定の固定支出、灯油代などを積立に登録すると、ここに年間の合計が出る。</div>';
       var bal = incT - fixT - spentT, done = rows.filter(function(r){ return r.sp>0; }).length;
       document.getElementById('repYear').innerHTML =
@@ -4058,6 +4080,11 @@
       return renderBreakdown(yearTx, 'この年の記録はない');
     });
   }
+  document.getElementById('repUtil').addEventListener('click', function(e){
+    var b = e.target.closest('.ry-tog'); if(!b) return;
+    var k = b.getAttribute('data-uk'), box = b.nextElementSibling, on = box.hidden;
+    box.hidden = !on; b.classList.toggle('open', on); utilOpen[k] = on;
+  });
   function reportOffset(){ return reportMode==='year' ? reportYearOffset : reportMonthOffset; }
   document.getElementById('repPrev').addEventListener('click', function(){ if(reportMode==='year') reportYearOffset -= 1; else reportMonthOffset -= 1; refreshReport(); });
   document.getElementById('repNext').addEventListener('click', function(){ if(reportOffset()>=0) return; if(reportMode==='year') reportYearOffset += 1; else reportMonthOffset += 1; refreshReport(); });
