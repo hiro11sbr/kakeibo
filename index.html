@@ -1614,11 +1614,13 @@
   .ry-months .rm2 span:first-child{ color:var(--ink-soft); }
   .ry-months .rm2.zero{ color:var(--ink-faint); }
   .ry-months[hidden]{ display:none; }
-  /* 履歴：その月の合計を画面の一番上に固定表示 */
-  .rec-total{ position:sticky; top:0; z-index:6; display:flex; justify-content:space-between; align-items:baseline;
-    margin:0 -18px 8px; padding:calc(8px + env(safe-area-inset-top,0px)) 60px 8px 18px; color:#fff; font-size:13px; font-weight:600;
-    background:rgba(14,38,120,.78); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid rgba(255,255,255,.18); }
+  /* 履歴：その月の合計（月名の下に表示） */
+  .rec-total{ display:flex; justify-content:space-between; align-items:baseline;
+    margin:0 -18px 8px; padding:8px 60px 8px 18px; color:#fff; font-size:13px; font-weight:600;
+    background:rgba(14,38,120,.78); border-bottom:1px solid rgba(255,255,255,.18); }
   .rec-total b{ font-size:19px; font-weight:700; }
+  /* 履歴：その日の日付・合計をカードに近づける（カード同士の間隔は変えない） */
+  #recordsList .grp-head{ padding-bottom:1px; }
 </style>
 </head>
 <body>
