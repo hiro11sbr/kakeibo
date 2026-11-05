@@ -1614,11 +1614,14 @@
   .ry-months .rm2 span:first-child{ color:var(--ink-soft); }
   .ry-months .rm2.zero{ color:var(--ink-faint); }
   .ry-months[hidden]{ display:none; }
-  /* 履歴：その月の合計（月名の下に表示） */
-  .rec-total{ display:flex; justify-content:space-between; align-items:baseline;
-    margin:0 -18px 8px; padding:8px 60px 8px 18px; color:#fff; font-size:13px; font-weight:600;
-    background:rgba(14,38,120,.78); border-bottom:1px solid rgba(255,255,255,.18); }
-  .rec-total b{ font-size:19px; font-weight:700; }
+  /* 履歴：その月の合計（月名の下に表示・ガラス調のカード） */
+  .rec-total{ display:flex; justify-content:space-between; align-items:center; margin:0 0 16px; padding:14px 18px 14px 20px;
+    border-radius:18px; color:#fff; border:1px solid rgba(255,255,255,.32);
+    background:linear-gradient(135deg, rgba(255,255,255,.24), rgba(255,255,255,.07));
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); box-shadow:0 8px 24px rgba(0,20,80,.18); }
+  .rec-total span{ font-size:11px; font-weight:700; letter-spacing:.12em; opacity:.78; }
+  .rec-total b{ font-size:30px; font-weight:700; letter-spacing:-.01em; line-height:1; }
+  .rec-total b i{ font-style:normal; font-size:16px; font-weight:600; opacity:.7; margin-right:3px; vertical-align:2px; }
   /* 履歴：その日の日付・合計をカードに近づける（カード同士の間隔は変えない） */
   #recordsList .grp-head{ padding-bottom:1px; }
 </style>
@@ -3013,7 +3016,7 @@
       var total = monthTx.reduce(function(s,t){return s+t.amount;},0);
       document.getElementById('recTitle').textContent = ym.y+'年'+(ym.m+1)+'月';
       document.getElementById('recRange').textContent = periodRange(mk);
-      document.getElementById('recTotalAmt').textContent = yen(total);
+      document.getElementById('recTotalAmt').innerHTML = '<i>¥</i>'+fmtN(total);
       document.getElementById('recNext').disabled = recordsMonthOffset>=0;
       renderRecordsList(cats, monthTx);
       return refreshReport();
