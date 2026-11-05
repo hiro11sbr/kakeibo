@@ -1560,6 +1560,13 @@
   .cs-tray .card-sub2 .pay-row:first-child{ border-top:none !important; }
   .cs-tray .cs-chev-sp{ width:26px !important; }
   .pay-row.cs-open .nm-t{ font-weight:700; }
+  /* ダークモード：内訳の受け皿が明るいまま文字が白くなり読めなかったため、暗い受け皿にする */
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .cs-tray{ background:rgba(255,255,255,.06); }
+    :root:not([data-theme="light"]) .cs-tray .card-sub2 .pay-row{ border-top-color:rgba(234,238,245,.08) !important; }
+  }
+  :root[data-theme="dark"] .cs-tray{ background:rgba(255,255,255,.06); }
+  :root[data-theme="dark"] .cs-tray .card-sub2 .pay-row{ border-top-color:rgba(234,238,245,.08) !important; }
   .cs-tray .nm-t{ word-break:keep-all; white-space:normal !important; overflow:visible !important; text-overflow:clip !important; line-height:1.3; }
   .cs-tray .pay-row{ padding-top:6px; padding-bottom:6px; }
   .cs-chev{ background:rgba(201,120,42,.14) !important; color:var(--expense) !important; }
