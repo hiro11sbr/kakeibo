@@ -1614,6 +1614,11 @@
   .ry-months .rm2 span:first-child{ color:var(--ink-soft); }
   .ry-months .rm2.zero{ color:var(--ink-faint); }
   .ry-months[hidden]{ display:none; }
+  /* 履歴：その月の合計を画面の一番上に固定表示 */
+  .rec-total{ position:sticky; top:0; z-index:6; display:flex; justify-content:space-between; align-items:baseline;
+    margin:0 -18px 8px; padding:calc(8px + env(safe-area-inset-top,0px)) 60px 8px 18px; color:#fff; font-size:13px; font-weight:600;
+    background:rgba(14,38,120,.78); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid rgba(255,255,255,.18); }
+  .rec-total b{ font-size:19px; font-weight:700; }
 </style>
 </head>
 <body>
@@ -1631,6 +1636,7 @@
         </div>
       </div>
       <div class="body">
+        <div class="rec-total"><span>この月の合計</span><b class="num" id="recTotalAmt">¥0</b></div>
         <div id="recordsList"></div>
       </div>
     </div>
@@ -2523,6 +2529,9 @@
       var k = mkNum(mk) - mkNum(billMonthOf(t, card)), parts = txParts(t);
       if(k >= 0 && k < parts.length) usePart += parts[k];
     });
+    // 利用分をこの月だけ手で調整したとき（記録は変えない）
+    var useRec = usePart, useOv = getOverride('use:'+card.id, mk);
+    if(useOv!=null) usePart = useOv;
     // 積立の支払い元がこのカードなら、支払月の利用として請求に含める（締め日・支払月に従う）
     var savPart = 0;
     ((payCtx && payCtx.savings) || []).forEach(function(sv){
@@ -2543,7 +2552,7 @@
     var xoPart = xoList.reduce(function(a,x){ return a + x.amount; }, 0);
     usePart += xoPart;
     var ov = getOverride(card.id, mk);
-    return {fixedPart:fixedPart, usePart:usePart, savPart:savPart, xoPart:xoPart, xoList:xoList, est:fixedPart+usePart, amount:(ov!=null?ov:fixedPart+usePart), confirmed:ov!=null, prevMonth:prev.getMonth()+1};
+    return {fixedPart:fixedPart, usePart:usePart, useRec:useRec, useAdj:useOv!=null, savPart:savPart, xoPart:xoPart, xoList:xoList, est:fixedPart+usePart, amount:(ov!=null?ov:fixedPart+usePart), confirmed:ov!=null, prevMonth:prev.getMonth()+1};
   }
   function migrateCards(){
     if(meta.cardsMigrated) return Promise.resolve();
@@ -3002,6 +3011,7 @@
       var total = monthTx.reduce(function(s,t){return s+t.amount;},0);
       document.getElementById('recTitle').textContent = ym.y+'年'+(ym.m+1)+'月';
       document.getElementById('recRange').textContent = periodRange(mk);
+      document.getElementById('recTotalAmt').textContent = yen(total);
       document.getElementById('recNext').disabled = recordsMonthOffset>=0;
       renderRecordsList(cats, monthTx);
       return refreshReport();
@@ -3157,7 +3167,7 @@
     else { if(it.overridden) tag = '今月変更'; if(it.via) sub = it.via; }
     if(!withMonth && it.account && accountsInUse().length > 1) sub = (sub ? sub+'・' : '')+it.account;
     if(!withMonth && it.due && it.actual && !sameDay(it.due, it.actual)) sub = (sub ? sub+'・' : '')+it.due.getDate()+'日が休日のため'+(it.actual<it.due?'繰り上げ':'繰り下げ');
-    var hasSub = !withMonth && it.kind==='card' && ((it.fx&&it.fx.length) || it.bill.usePart);
+    var hasSub = !withMonth && it.kind==='card' && ((it.fx&&it.fx.length) || it.bill.usePart || it.bill.useAdj);
     var opened = hasSub && openCardSubs[it.key+'__'+it.mk];
     var editType = it.kind==='card' ? 'card' : (it.kind==='fixed' ? 'fixed' : (it.kind==='xout' ? 'xout' : ''));
     var amt = editType
@@ -3190,7 +3200,7 @@
     });
     if(b.savPart){ sum += b.savPart; rows += row('sav', '積立（年払い）', '<span class="am num">'+yen(b.savPart)+'</span>'); }
     sum += use;
-    rows += row('use', 'カードの利用分\u200B（記録）', '<span class="am num">'+yen(use)+'</span>');
+    rows += row('use', 'カードの利用分\u200B'+(b.useAdj?'':'（記録）'), '<button type="button" class="am am-edit num" data-edit="cuse" data-id="use:'+esc(it.key)+'" data-mk="'+it.mk+'">'+yen(use)+'</button>', b.useAdj?'今月変更':'', '');
     // 確定額を入れたときは、内訳の合計との差を「雑費」として出す（内訳の合計＝確定額になる）
     if(b.confirmed && b.amount !== sum) rows += row('misc', '雑費', '<span class="am num">'+yen(b.amount - sum)+'</span>');
     return '<div class="card-sub2">'+rows+'</div>';
@@ -3388,6 +3398,13 @@
         return '<label class="es-bi"><span>'+esc(f.name)+(ovv!=null?'<i class="tag">今月変更</i>':'')+'</span><input class="num" type="text" inputmode="numeric" data-fid="'+esc(f.id)+'" data-orig="'+fixedAmt(f,mk)+'" value="'+fmtN(fixedAmt(f,mk))+'"></label>';
       }).join('')+'<div class="es-bi ro"><span>'+bill.prevMonth+'月の記録（このカード）</span><b class="num">'+yen(bill.usePart)+'</b></div>' : '';
       sheetOrigAmount = bill.amount;
+    } else if(type==='cuse'){
+      var ucard = cardsCache.filter(function(c){return c.id===id.slice(4);})[0]; if(!ucard) return;
+      var ub = cardBill(ucard, ym.y, ym.m, payCtx.fixed, payCtx.txs);
+      title = ucard.name+' '+mlabel+'の利用分';
+      note = 'この月だけの金額。記録（'+yen(ub.useRec)+'）は変わらない';
+      amount = ub.usePart - (ub.savPart||0) - (ub.xoPart||0);
+      reset = ub.useAdj ? '記録の合計（'+yen(ub.useRec)+'）に戻す' : '';
     } else if(type==='fixed'){
       var f = payCtx.fixed.filter(function(x){return x.id===id;})[0]; if(!f) return;
       var ov = getOverride(f.id, mk);
