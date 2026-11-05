@@ -640,10 +640,10 @@
   #view2 .row-add{ --c:#173F78; }
   #view1 .card .f-amt,  #viewRep .card .f-amt{ color:var(--ink); }
   nav.tabbar[data-v="0"] button.active{ color:#173A9E; }
-  nav.tabbar[data-v="1"] button.active{ color:#173F78; }
-  nav.tabbar[data-v="3"] button.active{ color:#173A9E; }
+  nav.tabbar[data-v="1"] button.active{ color:#173A9E; }
+  nav.tabbar[data-v="3"] button.active{ color:#173F78; }
   nav.tabbar[data-v="4"] button.active{ color:var(--ink); }
-  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) nav.tabbar[data-v="3"] button.active, :root:not([data-theme="light"]) nav.tabbar[data-v="2"] button.active, :root:not([data-theme="light"]) nav.tabbar[data-v="1"] button.active{ color:#8FB4FF; } }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) nav.tabbar[data-v="0"] button.active, :root:not([data-theme="light"]) nav.tabbar[data-v="2"] button.active, :root:not([data-theme="light"]) nav.tabbar[data-v="3"] button.active{ color:#8FB4FF; } }
   /* 見出しにタブのアイコンを大きく透かす＋ページ名 */
   .band{ overflow:hidden; }
   .band-mark{ position:absolute; right:-22px; top:calc(6px + env(safe-area-inset-top,0px)); width:150px; height:150px; opacity:.13; color:#fff; pointer-events:none; }
@@ -1634,6 +1634,32 @@
 <body>
 <div id="shell">
 
+  <div class="view tabview" id="viewRep">
+    <div class="app-inner">
+      <div class="band">
+        <span class="band-mark" data-icon="chartline"></span>
+        <header class="top-space"></header>
+        <div class="band-nav">
+          <button class="gbtn" id="repPrev">‹</button>
+          <div class="band-title"><div class="band-eyebrow">レポート</div><div class="t" id="repTitle">今月</div><div class="band-sub" id="repRange"></div></div>
+          <button class="gbtn" id="repNext">›</button>
+        </div>
+      </div>
+      <div class="body">
+        <div class="seg" id="repMode"><button type="button" class="on" data-rm="year">年</button><button type="button" data-rm="month">月</button></div>
+        <div class="grp" id="repUtilGrp" hidden><div class="grp-head"><span>年間の光熱費</span></div><div class="card rep-year" id="repUtil"></div></div>
+        <div class="grp"><div class="grp-head"><span id="repCatHead">カテゴリ別の変動費</span></div>
+          <div class="card rec-report" id="recReport">
+            <div class="rep-chart" id="repChart"></div>
+            <div id="repCatList"></div>
+          </div>
+        </div>
+        <div class="grp" id="repMonthsGrp" hidden><div class="grp-head"><span>月ごとの変動費</span></div><div class="card rep-months" id="repMonths"></div></div>
+        <div class="grp" id="repYearGrp" hidden><div class="grp-head"><span>年間の収支</span></div><div class="card rep-year" id="repYear"></div></div>
+      </div>
+    </div>
+  </div>
+
   <div class="view tabview" id="view1">
     <div class="app-inner">
       <div class="band">
@@ -1648,25 +1674,6 @@
       <div class="body">
         <div class="rec-total"><span>この月の合計</span><b class="num" id="recTotalAmt">¥0</b></div>
         <div id="recordsList"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="view tabview" id="view2">
-    <div class="app-inner">
-      <div class="band">
-        <span class="band-mark" data-icon="calrepeat"></span>
-        <header class="top-space"></header>
-        <div class="band-nav">
-          <button class="gbtn" id="payPrev">‹</button>
-          <div class="band-title"><div class="t" id="payTitle">今月</div></div>
-          <button class="gbtn" id="payNextBtn">›</button>
-        </div>
-        <div id="payChip2"></div>
-      </div>
-      <div class="body">
-        <div id="payAlert"></div>
-        <div id="payList"></div>
       </div>
     </div>
   </div>
@@ -1708,28 +1715,21 @@
     </div>
   </div>
 
-  <div class="view tabview" id="viewRep">
+  <div class="view tabview" id="view2">
     <div class="app-inner">
       <div class="band">
-        <span class="band-mark" data-icon="chartline"></span>
+        <span class="band-mark" data-icon="calrepeat"></span>
         <header class="top-space"></header>
         <div class="band-nav">
-          <button class="gbtn" id="repPrev">‹</button>
-          <div class="band-title"><div class="band-eyebrow">レポート</div><div class="t" id="repTitle">今月</div><div class="band-sub" id="repRange"></div></div>
-          <button class="gbtn" id="repNext">›</button>
+          <button class="gbtn" id="payPrev">‹</button>
+          <div class="band-title"><div class="t" id="payTitle">今月</div></div>
+          <button class="gbtn" id="payNextBtn">›</button>
         </div>
+        <div id="payChip2"></div>
       </div>
       <div class="body">
-        <div class="seg" id="repMode"><button type="button" class="on" data-rm="year">年</button><button type="button" data-rm="month">月</button></div>
-        <div class="grp" id="repUtilGrp" hidden><div class="grp-head"><span>年間の光熱費</span></div><div class="card rep-year" id="repUtil"></div></div>
-        <div class="grp"><div class="grp-head"><span id="repCatHead">カテゴリ別の変動費</span></div>
-          <div class="card rec-report" id="recReport">
-            <div class="rep-chart" id="repChart"></div>
-            <div id="repCatList"></div>
-          </div>
-        </div>
-        <div class="grp" id="repMonthsGrp" hidden><div class="grp-head"><span>月ごとの変動費</span></div><div class="card rep-months" id="repMonths"></div></div>
-        <div class="grp" id="repYearGrp" hidden><div class="grp-head"><span>年間の収支</span></div><div class="card rep-year" id="repYear"></div></div>
+        <div id="payAlert"></div>
+        <div id="payList"></div>
       </div>
     </div>
   </div>
@@ -2102,8 +2102,8 @@
 
 
   var TABS = [
-    {icon:'receipt', label:'履歴'}, {icon:'calrepeat', label:'支払い'},
-    {icon:'home', label:'ホーム'}, {icon:'chartline', label:'レポート'}, {icon:'gear', label:'設定'}
+    {icon:'chartline', label:'レポート'}, {icon:'receipt', label:'履歴'},
+    {icon:'home', label:'ホーム'}, {icon:'calrepeat', label:'支払い'}, {icon:'gear', label:'設定'}
   ];
   (function buildTabbar(){
     var bar = document.getElementById('tabbar');
@@ -2667,7 +2667,7 @@
     document.getElementById('catEditBar').hidden = !on;
   }
   document.getElementById('catEditDone').addEventListener('click', function(){ setCatEditing(false); });
-  document.getElementById('homeNotice').addEventListener('click', function(){ goTo(1); });
+  document.getElementById('homeNotice').addEventListener('click', function(){ goTo(3); });   // 支払いタブへ
   // グリッドを長押し→ドラッグで並べ替え（ホームとカテゴリ一覧で共通）
   function gridSortable(grid, itemSel, idAttr, o){
     var lpTimer = null, start = null, drag = null;
@@ -4268,7 +4268,7 @@
 
   // ---- タブ ----
   var VIEW_COUNT = 5;
-  var currentView = 2;   // 起動時はホーム（真ん中。左に履歴・支払い、右にレポート・設定）
+  var currentView = 2;   // 起動時はホーム（真ん中。左にレポート・履歴、右に支払い・設定）
   var shell = document.getElementById('shell');
   function updateActiveTab(){
     document.querySelectorAll('.tabbar button').forEach(function(b){
