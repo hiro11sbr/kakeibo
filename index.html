@@ -1633,6 +1633,7 @@
   .util-mk{ display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:7px; margin-right:8px; vertical-align:middle; flex:none; }
   .util-mk .icon{ stroke-width:2; }
   .rep-year .ry-tog > span{ display:inline-flex; align-items:center; }
+  .lrow .util-mk{ margin-right:0; width:28px; height:28px; border-radius:8px; }
 </style>
 </head>
 <body>
@@ -3597,11 +3598,11 @@
       html += '<div class="subhead"><span>'+esc(g.label)+'</span></div>';
       g.items.sort(function(a,b){ return (dayOf(a,'dueDay')||99)-(dayOf(b,'dueDay')||99) || b.amount-a.amount; }).forEach(function(f){
         var sub = [hasMonthly(f) ? '月ごと・今月' : '', (!fixedPaidByCard(f) && dayLabel(f,'dueDay')) ? dayLabel(f,'dueDay') : '', ((!f.payId || f.payId==='bank') && f.account) ? f.account : ''].filter(Boolean).join('・');
-        html += lrow('fixed', f.id, f.name, sub, baseAmt(f,monthKey()));
+        html += lrow('fixed', f.id, f.name, sub, baseAmt(f,monthKey()), '', isUtility(f) ? utilMark(f.name) : '');
       });
       html += '<div class="subfoot"><span>小計</span><span class="num">'+yen(sum)+'</span></div>';
     });
-    savings.forEach(function(f){ html += '<div class="subhead"><span>積立</span></div>'+lrow('goSavings', f.id, f.name, '下の「積立」で編集', f.amount); });
+    savings.forEach(function(f){ html += '<div class="subhead"><span>積立</span></div>'+lrow('goSavings', f.id, f.name, '下の「積立」で編集', f.amount, '', isUtility(f) ? utilMark(f.name) : ''); });
     document.getElementById('setFixedList').innerHTML = html;
     document.getElementById('setFixedTotal').textContent = yen(items.reduce(function(s,f){return s+baseAmt(f,monthKey());},0));
   }
