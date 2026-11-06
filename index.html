@@ -4027,7 +4027,12 @@
   // 光熱費の判定：項目ごとのチェック（utility）を優先。未設定の項目だけ、名前に電気・ガス・水道・灯油・光熱が入るかで決める
   // 光熱費のマーク：名前から電気・ガス・水道・灯油を見分ける（どれでもなければ電気のマークを灰色で）
   function utilMark(name){
-    var n = String(name||''), k = /灯油/.test(n) ? ['tank','#E0453A'] : /ガス/.test(n) ? ['flame','#F2643A'] : /水道|水/.test(n) ? ['drop','#2E9BEA'] : /電気|電力/.test(n) ? ['bolt','#E8A400'] : ['bolt','#8A94A6'];
+    // 表記揺れ：全角英数は半角に、大文字小文字は区別しない（例：ＬＰＧ・lpg・プロパン → ガス）
+    var n = String(name||''); try{ n = n.normalize('NFKC'); }catch(e){}
+    var k = /灯油|とうゆ|ホームタンク|kerosene/i.test(n) ? ['tank','#E0453A']
+      : /ガス|がす|プロパン|LPG|LP瓦斯|gas/i.test(n) ? ['flame','#F2643A']
+      : /水道|すいどう|下水|上水|水|water/i.test(n) ? ['drop','#2E9BEA']
+      : /電気|でんき|電力|ほくでん|北電|electric/i.test(n) ? ['bolt','#E8A400'] : ['bolt','#8A94A6'];
     return '<span class="util-mk" style="color:'+k[1]+';background:color-mix(in srgb, '+k[1]+' 16%, transparent)">'+iconSvg(k[0],14)+'</span>';
   }
   function isUtility(f){ return f.utility!=null ? !!f.utility : /電気|ガス|水道|灯油|光熱/.test(f.name||''); }
