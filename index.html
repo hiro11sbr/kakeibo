@@ -640,10 +640,10 @@
   #view2 .row-add{ --c:#173F78; }
   #view1 .card .f-amt,  #viewRep .card .f-amt{ color:var(--ink); }
   nav.tabbar[data-v="0"] button.active{ color:#173A9E; }
-  nav.tabbar[data-v="1"] button.active{ color:#173F78; }
-  nav.tabbar[data-v="3"] button.active{ color:#173A9E; }
+  nav.tabbar[data-v="1"] button.active{ color:#173A9E; }
+  nav.tabbar[data-v="3"] button.active{ color:#173F78; }
   nav.tabbar[data-v="4"] button.active{ color:var(--ink); }
-  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) nav.tabbar[data-v="3"] button.active, :root:not([data-theme="light"]) nav.tabbar[data-v="2"] button.active, :root:not([data-theme="light"]) nav.tabbar[data-v="1"] button.active{ color:#8FB4FF; } }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) nav.tabbar[data-v="0"] button.active, :root:not([data-theme="light"]) nav.tabbar[data-v="2"] button.active, :root:not([data-theme="light"]) nav.tabbar[data-v="3"] button.active{ color:#8FB4FF; } }
   /* 見出しにタブのアイコンを大きく透かす＋ページ名 */
   .band{ overflow:hidden; }
   .band-mark{ position:absolute; right:-22px; top:calc(6px + env(safe-area-inset-top,0px)); width:150px; height:150px; opacity:.13; color:#fff; pointer-events:none; }
@@ -1629,10 +1629,45 @@
   .rec-total b i{ font-style:normal; font-size:17px; font-weight:700; opacity:.6; margin-right:3px; vertical-align:3px; }
   /* 履歴：その日の日付・合計をカードに近づける（カード同士の間隔は変えない） */
   #recordsList .grp-head{ padding-bottom:1px; }
+  /* 光熱費のマーク */
+  .util-mk{ display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:7px; margin-right:8px; vertical-align:middle; flex:none; }
+  .util-mk .icon{ stroke-width:2; }
+  .rep-year .ry-tog > span{ display:inline-flex; align-items:center; }
+  .util-pick .up-list{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:6px; }
+  .util-pick .up-btn{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 0 6px; border-radius:10px; border:1.5px solid var(--rule); background:var(--card); color:var(--ink); font:inherit; font-size:12px; -webkit-tap-highlight-color:transparent; }
+  .util-pick .up-btn .util-mk{ margin:0; width:30px; height:30px; border-radius:9px; }
+  .util-pick .up-btn.on{ border-color:var(--accent-a); background:color-mix(in srgb, var(--accent-a) 8%, var(--card)); font-weight:700; }
+  .lrow .util-mk{ margin-right:0; width:28px; height:28px; border-radius:8px; }
 </style>
 </head>
 <body>
 <div id="shell">
+
+  <div class="view tabview" id="viewRep">
+    <div class="app-inner">
+      <div class="band">
+        <span class="band-mark" data-icon="chartline"></span>
+        <header class="top-space"></header>
+        <div class="band-nav">
+          <button class="gbtn" id="repPrev">‹</button>
+          <div class="band-title"><div class="band-eyebrow">レポート</div><div class="t" id="repTitle">今月</div><div class="band-sub" id="repRange"></div></div>
+          <button class="gbtn" id="repNext">›</button>
+        </div>
+      </div>
+      <div class="body">
+        <div class="seg" id="repMode"><button type="button" class="on" data-rm="year">年</button><button type="button" data-rm="month">月</button></div>
+        <div class="grp" id="repUtilGrp" hidden><div class="grp-head"><span>年間の光熱費</span></div><div class="card rep-year" id="repUtil"></div></div>
+        <div class="grp"><div class="grp-head"><span id="repCatHead">カテゴリ別の変動費</span></div>
+          <div class="card rec-report" id="recReport">
+            <div class="rep-chart" id="repChart"></div>
+            <div id="repCatList"></div>
+          </div>
+        </div>
+        <div class="grp" id="repMonthsGrp" hidden><div class="grp-head"><span>月ごとの変動費</span></div><div class="card rep-months" id="repMonths"></div></div>
+        <div class="grp" id="repYearGrp" hidden><div class="grp-head"><span>年間の収支</span></div><div class="card rep-year" id="repYear"></div></div>
+      </div>
+    </div>
+  </div>
 
   <div class="view tabview" id="view1">
     <div class="app-inner">
@@ -1648,25 +1683,6 @@
       <div class="body">
         <div class="rec-total"><span>この月の合計</span><b class="num" id="recTotalAmt">¥0</b></div>
         <div id="recordsList"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="view tabview" id="view2">
-    <div class="app-inner">
-      <div class="band">
-        <span class="band-mark" data-icon="calrepeat"></span>
-        <header class="top-space"></header>
-        <div class="band-nav">
-          <button class="gbtn" id="payPrev">‹</button>
-          <div class="band-title"><div class="t" id="payTitle">今月</div></div>
-          <button class="gbtn" id="payNextBtn">›</button>
-        </div>
-        <div id="payChip2"></div>
-      </div>
-      <div class="body">
-        <div id="payAlert"></div>
-        <div id="payList"></div>
       </div>
     </div>
   </div>
@@ -1708,28 +1724,21 @@
     </div>
   </div>
 
-  <div class="view tabview" id="viewRep">
+  <div class="view tabview" id="view2">
     <div class="app-inner">
       <div class="band">
-        <span class="band-mark" data-icon="chartline"></span>
+        <span class="band-mark" data-icon="calrepeat"></span>
         <header class="top-space"></header>
         <div class="band-nav">
-          <button class="gbtn" id="repPrev">‹</button>
-          <div class="band-title"><div class="band-eyebrow">レポート</div><div class="t" id="repTitle">今月</div><div class="band-sub" id="repRange"></div></div>
-          <button class="gbtn" id="repNext">›</button>
+          <button class="gbtn" id="payPrev">‹</button>
+          <div class="band-title"><div class="t" id="payTitle">今月</div></div>
+          <button class="gbtn" id="payNextBtn">›</button>
         </div>
+        <div id="payChip2"></div>
       </div>
       <div class="body">
-        <div class="seg" id="repMode"><button type="button" class="on" data-rm="year">年</button><button type="button" data-rm="month">月</button></div>
-        <div class="grp" id="repUtilGrp" hidden><div class="grp-head"><span>年間の光熱費</span></div><div class="card rep-year" id="repUtil"></div></div>
-        <div class="grp"><div class="grp-head"><span id="repCatHead">カテゴリ別の変動費</span></div>
-          <div class="card rec-report" id="recReport">
-            <div class="rep-chart" id="repChart"></div>
-            <div id="repCatList"></div>
-          </div>
-        </div>
-        <div class="grp" id="repMonthsGrp" hidden><div class="grp-head"><span>月ごとの変動費</span></div><div class="card rep-months" id="repMonths"></div></div>
-        <div class="grp" id="repYearGrp" hidden><div class="grp-head"><span>年間の収支</span></div><div class="card rep-year" id="repYear"></div></div>
+        <div id="payAlert"></div>
+        <div id="payList"></div>
       </div>
     </div>
   </div>
@@ -2062,6 +2071,11 @@
   "use strict";
 
   var ICONS = {
+    // 光熱費のマーク（電気・ガス・水道・灯油）
+    bolt: '<path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12Z"/>',
+    flame: '<path d="M12 21c-3.9 0-6.5-2.6-6.5-6.2 0-3.3 2.3-5.4 3.6-7.6.3 1.6 1.1 2.6 2.1 3.1C11.4 7 12.7 4.6 15 3c-.3 2.7 1 4.5 2.3 6.3 1 1.4 1.7 3 1.7 5.1C19 18.3 16.1 21 12 21Z"/><path d="M12 21c-1.7 0-2.8-1.1-2.8-2.7 0-1.6 1.3-2.5 2.8-4.3 1.5 1.8 2.8 2.7 2.8 4.3 0 1.6-1.1 2.7-2.8 2.7Z"/>',
+    drop: '<path d="M12 3s-6 6.6-6 11a6 6 0 0 0 12 0c0-4.4-6-11-6-11Z"/><path d="M9.3 14.3a2.7 2.7 0 0 0 2.7 2.7"/>',
+    tank: '<path d="M4 10a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M10 8V5.5A1.5 1.5 0 0 1 11.5 4h6A1.5 1.5 0 0 1 19 5.5V8"/><path d="M13 6.5h3"/><rect x="5" y="4.5" width="3" height="3.5" rx=".6"/>',
     food: '<path d="M7 3v7M9 3v7M7 10a2 2 0 0 0 4 0M8 10v11"/><path d="M16 3v6c0 1.5 1 2.5 2 2.5V21"/>',
     building: '<rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 8h1M14 8h1M9 12h1M14 12h1M9 16h1M14 16h1"/>',
     gamepad: '<rect x="2" y="8" width="20" height="9" rx="4"/><path d="M7 11v3M5.5 12.5h3"/><circle cx="16" cy="11.5" r="1"/><circle cx="18.5" cy="14" r="1"/>',
@@ -2102,8 +2116,8 @@
 
 
   var TABS = [
-    {icon:'receipt', label:'履歴'}, {icon:'calrepeat', label:'支払い'},
-    {icon:'home', label:'ホーム'}, {icon:'chartline', label:'レポート'}, {icon:'gear', label:'設定'}
+    {icon:'chartline', label:'レポート'}, {icon:'receipt', label:'履歴'},
+    {icon:'home', label:'ホーム'}, {icon:'calrepeat', label:'支払い'}, {icon:'gear', label:'設定'}
   ];
   (function buildTabbar(){
     var bar = document.getElementById('tabbar');
@@ -2667,7 +2681,7 @@
     document.getElementById('catEditBar').hidden = !on;
   }
   document.getElementById('catEditDone').addEventListener('click', function(){ setCatEditing(false); });
-  document.getElementById('homeNotice').addEventListener('click', function(){ goTo(1); });
+  document.getElementById('homeNotice').addEventListener('click', function(){ goTo(3); });   // 支払いタブへ
   // グリッドを長押し→ドラッグで並べ替え（ホームとカテゴリ一覧で共通）
   function gridSortable(grid, itemSel, idAttr, o){
     var lpTimer = null, start = null, drag = null;
@@ -3588,11 +3602,11 @@
       html += '<div class="subhead"><span>'+esc(g.label)+'</span></div>';
       g.items.sort(function(a,b){ return (dayOf(a,'dueDay')||99)-(dayOf(b,'dueDay')||99) || b.amount-a.amount; }).forEach(function(f){
         var sub = [hasMonthly(f) ? '月ごと・今月' : '', (!fixedPaidByCard(f) && dayLabel(f,'dueDay')) ? dayLabel(f,'dueDay') : '', ((!f.payId || f.payId==='bank') && f.account) ? f.account : ''].filter(Boolean).join('・');
-        html += lrow('fixed', f.id, f.name, sub, baseAmt(f,monthKey()));
+        html += lrow('fixed', f.id, f.name, sub, baseAmt(f,monthKey()), '', isUtility(f) ? utilMark(f) : '');
       });
       html += '<div class="subfoot"><span>小計</span><span class="num">'+yen(sum)+'</span></div>';
     });
-    savings.forEach(function(f){ html += '<div class="subhead"><span>積立</span></div>'+lrow('goSavings', f.id, f.name, '下の「積立」で編集', f.amount); });
+    savings.forEach(function(f){ html += '<div class="subhead"><span>積立</span></div>'+lrow('goSavings', f.id, f.name, '下の「積立」で編集', f.amount, '', isUtility(f) ? utilMark(f) : ''); });
     document.getElementById('setFixedList').innerHTML = html;
     document.getElementById('setFixedTotal').textContent = yen(items.reduce(function(s,f){return s+baseAmt(f,monthKey());},0));
   }
@@ -3650,7 +3664,12 @@
         }
         if(t==='check'){
           var on = (k==='isDefault') ? (rec.id && rec.id===defaultPay()) : (k==='utility' ? isUtility(rec) : !!v);
-          return '<label class="fld chkrow wide" data-fk="'+k+'"><input type="checkbox" data-f="'+k+'"'+(on?' checked':'')+'><span class="cb"></span><span class="cbl">'+lab+'</span></label>';
+          var chk = '<label class="fld chkrow wide" data-fk="'+k+'"><input type="checkbox" data-f="'+k+'"'+(on?' checked':'')+'><span class="cb"></span><span class="cbl">'+lab+'</span></label>';
+          if(k!=='utility') return chk;
+          // 光熱費の種類（マークに使う）。未選択なら名前から推定した種類を最初から選んでおく
+          var uk = rec.utilKind || utilKindGuess(rec.name);
+          return chk+'<div class="fld wide util-pick" data-fk="utilKind"'+(on?'':' hidden')+'><span>光熱費の種類</span><input type="hidden" data-f="utilKind" value="'+uk+'"><div class="up-list">'+
+            UTIL_KINDS.map(function(x){ return '<button type="button" class="up-btn'+(x[0]===uk?' on':'')+'" data-ukind="'+x[0]+'">'+utilMarkHtml(x[0],16)+'<span>'+x[1]+'</span></button>'; }).join('')+'</div></div>';
         }
         if(t==='billing'){
           var bv = v || 'debit';
@@ -3727,6 +3746,8 @@
       f.querySelector('[data-fk="dnum"]').hidden = dtype.value!=='day';
       f.querySelector('[data-fk="hrule"]').hidden = dtype.value==='none';
     }
+    var uchk = f.querySelector('[data-f="utility"]'), upick = f.querySelector('[data-fk="utilKind"]');
+    if(uchk && upick) upick.hidden = !uchk.checked;
     var mode = f.querySelector('[data-f="mode"]');
     if(mode){
       var mon = mode.value==='monthly';
@@ -3742,6 +3763,12 @@
     if(d.length >= 4){ t.value = d.slice(0,4); var m = document.querySelector('#isForm [data-f="dueMonth"]'); if(m){ m.focus(); try{ m.select(); }catch(err){} } }
   });
   document.getElementById('isForm').addEventListener('click', function(e){
+    var ub = e.target.closest('[data-ukind]');
+    if(ub){
+      var uw = ub.closest('.util-pick'); uw.querySelector('[data-f="utilKind"]').value = ub.getAttribute('data-ukind');
+      uw.querySelectorAll('.up-btn').forEach(function(x){ x.classList.toggle('on', x===ub); });
+      return;
+    }
     var b = e.target.closest('[data-acn]'); if(!b) return;
     var wrap = b.closest('.acct-pick'); wrap.querySelector('[data-f="account"]').value = b.getAttribute('data-acn');
     wrap.querySelectorAll('.ap').forEach(function(x){ x.classList.toggle('on', x===b); });
@@ -3797,7 +3824,9 @@
       else rec[k] = v;
     });
     var uc = f.querySelector('[data-f="utility"]');
-    if((c.kind==='fixed' || c.kind==='savings') && uc) rec.utility = uc.checked;   // チェックの有無を保存（未設定の項目だけ名前で判定）
+    if((c.kind==='fixed' || c.kind==='savings') && uc) rec.utility = uc.checked;
+    var ukv = f.querySelector('[data-f="utilKind"]');
+    if((c.kind==='fixed' || c.kind==='savings') && ukv) rec.utilKind = ukv.value || '';   // 光熱費の種類（マーク用）   // チェックの有無を保存（未設定の項目だけ名前で判定）
     closeItemSheet();
     var p = put(def.store, rec);
     var dc = f.querySelector('[data-f="isDefault"]');
@@ -4015,6 +4044,21 @@
   }
   var reportMode = 'year', reportYearOffset = 0, utilOpen = {};
   // 光熱費の判定：項目ごとのチェック（utility）を優先。未設定の項目だけ、名前に電気・ガス・水道・灯油・光熱が入るかで決める
+  // 光熱費の種類とマーク。編集画面で選んだ種類（utilKind）を優先し、未選択なら名前から推定する
+  var UTIL_KINDS = [['elec','電気','bolt','#E8A400'],['gas','ガス','flame','#F2643A'],['water','水道','drop','#2E9BEA'],['oil','灯油','tank','#E0453A']];
+  function utilKindGuess(name){
+    // 表記揺れ：全角英数は半角に、大文字小文字は区別しない（例：ＬＰＧ・lpg・プロパン → ガス）
+    var n = String(name||''); try{ n = n.normalize('NFKC'); }catch(e){}
+    return /灯油|とうゆ|ホームタンク|kerosene/i.test(n) ? 'oil'
+      : /ガス|がす|プロパン|LPG|LP瓦斯|gas/i.test(n) ? 'gas'
+      : /水道|すいどう|下水|上水|水|water/i.test(n) ? 'water'
+      : /電気|でんき|電力|ほくでん|北電|electric/i.test(n) ? 'elec' : '';
+  }
+  function utilMarkHtml(kind, size){
+    var k = UTIL_KINDS.filter(function(x){ return x[0]===kind; })[0] || ['','','bolt','#8A94A6'];   // 種類不明は灰色の稲妻
+    return '<span class="util-mk" style="color:'+k[3]+';background:color-mix(in srgb, '+k[3]+' 16%, transparent)">'+iconSvg(k[2],size||14)+'</span>';
+  }
+  function utilMark(item){ return utilMarkHtml((item && item.utilKind) || utilKindGuess(item && item.name)); }
   function isUtility(f){ return f.utility!=null ? !!f.utility : /電気|ガス|水道|灯油|光熱/.test(f.name||''); }
   // カテゴリ別の内訳（ドーナツ＋一覧）
   function renderBreakdown(txs, emptyMsg){
@@ -4075,23 +4119,23 @@
       // 光熱費：電気・ガス・水道などの名前の固定支出を、月ごとの金額（その月だけ変えた分も含む）で合計する
       var utils = fixed.filter(function(f){ return !f.variable && !f.fromSavings && isUtility(f); }).map(function(f){
         var ms = [], t = 0; for(var mm=1; mm<=12; mm++){ var k3 = y+'-'+mm, v = activeIn(f, k3) ? fixedAmt(f, k3) : 0; ms.push(v); t += v; }
-        return {name:f.name, total:t, months:ms};
+        return {name:f.name, kind:f.utilKind, total:t, months:ms};
       });
       // 積立に入れている光熱費（灯油など）は、合計は1年あたりの金額（1回分÷何年ごとか）、月別は支払い月に1回分を表示
       savItems.filter(isUtility).forEach(function(sv){
         var ms = []; for(var mm=0; mm<12; mm++) ms.push(savingsDueIn(sv, y, mm) ? sv.amount : 0);
-        utils.push({name:sv.name+'（積立）', total:Math.round(sv.amount/(sv.periodYears||1)), months:ms});
+        utils.push({name:sv.name+'（積立）', kind:sv.utilKind || utilKindGuess(sv.name), total:Math.round(sv.amount/(sv.periodYears||1)), months:ms});
       });
       utils.sort(function(a,b){ return b.total-a.total; });
       var utilT = utils.reduce(function(s,u){ return s+u.total; },0);
       var utilM = []; for(var q=0; q<12; q++) utilM.push(utils.reduce(function(s,u){ return s+u.months[q]; },0));
-      function utilRow(key, name, total, months, cls){
+      function utilRow(key, name, total, months, cls, kind){
         var open = !!utilOpen[key];
-        return '<button type="button" class="ry-row ry-tog'+(cls?' '+cls:'')+(open?' open':'')+'" data-uk="'+esc(key)+'"><span><i class="ry-arr"></i>'+esc(name)+'</span><b class="num">'+yen(total)+'</b></button>'+
+        return '<button type="button" class="ry-row ry-tog'+(cls?' '+cls:'')+(open?' open':'')+'" data-uk="'+esc(key)+'"><span><i class="ry-arr"></i>'+(cls==='total' ? '' : utilMark({name:name, utilKind:kind}))+esc(name)+'</span><b class="num">'+yen(total)+'</b></button>'+
           '<div class="ry-months"'+(open?'':' hidden')+'>'+months.map(function(v,i){ return '<div class="rm2'+(v>0?'':' zero')+'"><span>'+(i+1)+'月</span><span class="num">'+yen(v)+'</span></div>'; }).join('')+'</div>';
       }
       document.getElementById('repUtil').innerHTML = utils.length ?
-        utils.map(function(u, i){ return utilRow('i'+i+u.name, u.name, u.total, u.months); }).join('')+
+        utils.map(function(u, i){ return utilRow('i'+i+u.name, u.name, u.total, u.months, '', u.kind); }).join('')+
         utilRow('__total', '合計', utilT, utilM, 'total')+'<div class="ry-note">月平均 '+yen(utilT/12)+'。矢印で月別を表示。固定支出は設定の金額（先の月の予定も含む）、積立は合計が1年あたりの金額、月別は支払い月の1回分。</div>' :
         '<div class="ry-note">電気代・ガス代・水道代を設定の固定支出、灯油代などを積立に登録すると、ここに年間の合計が出る。</div>';
       var bal = incT - fixT - spentT, done = rows.filter(function(r){ return r.sp>0; }).length;
@@ -4268,7 +4312,7 @@
 
   // ---- タブ ----
   var VIEW_COUNT = 5;
-  var currentView = 2;   // 起動時はホーム（真ん中。左に履歴・支払い、右にレポート・設定）
+  var currentView = 2;   // 起動時はホーム（真ん中。左にレポート・履歴、右に支払い・設定）
   var shell = document.getElementById('shell');
   function updateActiveTab(){
     document.querySelectorAll('.tabbar button').forEach(function(b){

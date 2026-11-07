@@ -8,7 +8,7 @@
 - データはブラウザの IndexedDB(DB名 `kakeibo`、バージョン4)に保存。ストア: categories, transactions, fixedCosts, income, savingsItems, settings, paidStatus, cards, monthly。
 
 ## 画面(タブ)の並び
-履歴 → 支払い → **ホーム(真ん中・起動時に開く)** → レポート → 設定。
+レポート → 履歴 → **ホーム(真ん中・起動時に開く)** → 支払い → 設定。
 - DOM の並びとタブ番号が対応している。並べ替えるときは `TABS`、`#shell` 内の各 `.view` の並び、`VIEW_COUNT`、`currentView` の初期値、ホームの警告の `goTo(...)`、CSS の `nav.tabbar[data-v="N"]` をそろえて直すこと。
 - レポート画面の id は `viewRep`(履歴の `view1` と同じ見た目になるよう、CSS は `#view1` の隣に `#viewRep` を足してある)。
 
